@@ -1,5 +1,6 @@
 package HIMYM;
 
+import java.sql.SQLException;
 import java.util.LinkedList;
 
 
@@ -28,7 +29,20 @@ public class ObjectLists {
 	}
 	
 	public void loadEverything(){
+		try {
+			db.con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
+		try {
+			db.connect();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		cleanEverything();
 		initGuilds();
 		initFactions();
 		initPlayers();
@@ -36,16 +50,31 @@ public class ObjectLists {
 		initTimes();
 		initFights();
 		
+		
+	}
+	
+	public void cleanEverything(){
+		
+		guilds.clear();
+		players.clear();
+		places.clear();
+		times.clear();
+		fights.clear();
+		
 	}
 	
 	public void initGuilds(){
 		
-		String names = db.requestString("SELECT UNIQUE NAME FROM GUILDS");
+		String names = db.requestString("SELECT NAME FROM GUILDS");
 		String[] name = names.split("\n");
+		String nbgotkilled = db.requestString("SELECT NBGOTKILLED FROM GUILDS");
+		String nbkilled = db.requestString("SELECT NBKILLED FROM GUILDS");
+		String[] nbgk = nbgotkilled.split("\n");
+		String[] nbk = nbkilled.split("\n");
 		
 		for(int i = 0 ; i < name.length ; i ++){
 			
-			guilds.add(new Guild(name[i]));
+			guilds.add(new Guild(name[i], Integer.valueOf(nbgk[i]), Integer.valueOf(nbk[i])));
 			System.out.println("New guild added : " + name[i] + " !");
 			
 		}
@@ -66,15 +95,15 @@ public class ObjectLists {
 		
 	}
 	
-	public void addGuild(String name){
+	public void addGuild(String name, int nbgotkilled, int nbkilled){
 		
-		guilds.add(new Guild(name));
+		guilds.add(new Guild(name, nbgotkilled, nbkilled));
 		
 	}
 	
 	public void initFactions(){
 		
-		String names = db.requestString("SELECT UNIQUE NAME FROM FACTIONS");
+		String names = db.requestString("SELECT NAME FROM FACTIONS");
 		String[] name = names.split("\n");
 		
 		for(int i = 0 ; i < name.length ; i ++){
@@ -103,7 +132,7 @@ public class ObjectLists {
 
 	public void initPlayers(){
 		
-		String names = db.requestString("SELECT UNIQUE NAME FROM PLAYERS");
+		String names = db.requestString("SELECT NAME FROM PLAYERS");
 		String[] name = names.split("\n");
 		
 		String guildName;
@@ -119,31 +148,36 @@ public class ObjectLists {
 		int skill;
 		boolean backped;
 		
-		for(int i = 0 ; i < name.length ; i ++){
+		for(int i = 1 ; i < name.length + 1 ; i ++){
 			
-			guildName = db.requestString("SELECT UNIQUE PLAYERS.GUILD FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'");
-			if(findGuild(guildName) == null) guilds.add(new Guild(guildName));
+			
+			names = db.requestString("SELECT NAME from (select p.NAME, rownum r from PLAYERS p) where r = " + i);
+			
+			guildName = db.requestString("SELECT PLAYERS.GUILD FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
+			int nbgk = Integer.valueOf(db.requestString("SELECT NBGOTKILLED FROM GUILDS WHERE NAME = '" + guildName + "'"));
+			int nbk = Integer.valueOf(db.requestString("SELECT  NBKILLED FROM GUILDS WHERE NAME = '" + guildName + "'"));
+			if(findGuild(guildName) == null) guilds.add(new Guild(guildName, nbgk, nbk));
 			guild = findGuild(guildName);
 			
-			factionName = db.requestString("SELECT UNIQUE PLAYERS.FACTION FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'");
+			factionName = db.requestString("SELECT PLAYERS.FACTION FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
 			faction = findFaction(factionName);
 			
-			classeName = db.requestString("SELECT UNIQUE PLAYERS.CLASSE FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'").toUpperCase();
+			classeName = db.requestString("SELECT PLAYERS.CLASSE FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'").toUpperCase();
 			classe = Classe.valueOf(classeName.toUpperCase());
 			
-			specializationName = db.requestString("SELECT UNIQUE PLAYERS.SPECIALIZATION FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'").toUpperCase();
+			specializationName = db.requestString("SELECT PLAYERS.SPECIALIZATION FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'").toUpperCase();
 			specialization = Specialization.valueOf(specializationName);
 			
-			hpLeft = Integer.valueOf(db.requestString("SELECT UNIQUE PLAYERS.HPLEFT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'"));
+			hpLeft = Integer.valueOf(db.requestString("SELECT PLAYERS.HPLEFT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
 			
-			comment = db.requestString("SELECT UNIQUE PLAYERS.SKILLCOMMENT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'");
+			comment = db.requestString("SELECT PLAYERS.SKILLCOMMENT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
 			
-			skill = Integer.valueOf(db.requestString("SELECT UNIQUE PLAYERS.SKILL FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'"));
+			skill = Integer.valueOf(db.requestString("SELECT PLAYERS.SKILL FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
 			
-			backped = Boolean.valueOf(db.requestString("SELECT UNIQUE PLAYERS.BACKPED FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i] + "'"));
+			backped = Boolean.valueOf(db.requestString("SELECT PLAYERS.BACKPED FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
 			
-			players.add(new Player(name[i], guild, faction, classe, specialization, hpLeft, comment, skill, backped));
-			System.out.println("New player Added : Name : " + name[i] + " Guilde : " + guildName + " Faction : " + factionName + " Class : " + classeName + " Specialization : " + specializationName + " hpLeft : " + hpLeft + " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
+			players.add(new Player(names, guild, faction, classe, specialization, hpLeft, comment, skill, backped));
+			System.out.println("New player Added : Name : " + names + " Guilde : " + guildName + " Faction : " + factionName + " Class : " + classeName + " Specialization : " + specializationName + " hpLeft : " + hpLeft + " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
 			
 		}
 
@@ -155,10 +189,10 @@ public class ObjectLists {
 		
 		for(int i = 0 ; i < players.size() ; i ++){
 			
-			if(players.get(i).getName() == name) return players.get(i);
+			if(players.get(i).getName().matches(name)) return players.get(i);
 			
 		}
-			
+		
 		return null;
 		
 	}
@@ -167,27 +201,27 @@ public class ObjectLists {
 			String comment, int skill, boolean backped){
 		
 		players.add(new Player(name, findGuild(guild), findFaction(faction), Classe.valueOf(classe.toUpperCase()), Specialization.valueOf(specialization.toUpperCase()), hpLeft, comment, skill, backped));
-		
+				
 	}
 	
 	public void initPlaces(){
 		
-		String names = db.requestString("SELECT UNIQUE NAME FROM PLACES");
-		String xs = db.requestString("SELECT UNIQUE Y FROM PLACES");
-		String ys = db.requestString("SELECT UNIQUE Y FROM PLACES");
+		String names = db.requestString("SELECT NAME FROM PLACES");
+		String xs;
+		String ys;
 		
 		String[] name = names.split("\n");
 
-		String[] x = xs.split("\n");
-		String[] y = ys.split("\n");
-		
-		for(int i = 0 ; i < name.length ; i ++){
+		for(int i = 1 ; i < name.length + 1 ; i ++){
 			
-			places.add(new Place(name[i], Integer.valueOf(x[i]), Integer.valueOf(y[i])));
-			System.out.println("New place added : " + name[i] + " x : " + Integer.valueOf(x[i]) + " y : " + Integer.valueOf(y[i]) + " !");
+			xs = db.requestString("SELECT X from (select p.X, rownum r from PLACES p) where r = " + i);
+			ys = db.requestString("SELECT Y from (select p.Y, rownum r from PLACES p) where r = " + i);
+			names = db.requestString("SELECT NAME from (select p.NAME, rownum r from PLACES p) where r = " + i);
+			
+			places.add(new Place(names, Integer.valueOf(xs), Integer.valueOf(ys)));
+			System.out.println("New place added : " + names + " x : " + Integer.valueOf(xs) + " y : " + Integer.valueOf(ys) + " !");
 			
 		}
-
 		
 	}
 	
@@ -197,7 +231,7 @@ public class ObjectLists {
 		
 		for(int i = 0 ; i < places.size() ; i ++){
 			
-			if(places.get(i).getName() == name && places.get(i).getX() == x && places.get(i).getY() == y) return places.get(i);
+			if(places.get(i).getName().matches(name) && places.get(i).getX() == x && places.get(i).getY() == y) return places.get(i);
 			
 		}
 			
@@ -213,7 +247,7 @@ public class ObjectLists {
 	
 	public void initTimes(){
 		
-		String time = db.requestString("SELECT UNIQUE TO_CHAR(TIME ,'YYYY-MM-DD HH24:MI:SS') FROM TIMES");
+		String time = db.requestString("SELECT TO_CHAR(TIME ,'YYYY-MM-DD HH24:MI:SS') FROM TIMES");
 		
 		String[] all = time.split("\n");
 		
@@ -240,7 +274,7 @@ public class ObjectLists {
 		
 		for(int i = 0 ; i < times.size() ; i ++){
 			
-			if(times.get(i).getTiming() == timing) return times.get(i);
+			if(times.get(i).getTiming().matches(timing)) return times.get(i);
 			
 		}
 		
@@ -255,10 +289,8 @@ public class ObjectLists {
 	}
 	
 	public void initFights(){
-		
-		//Player a, Player b, Player winner, Player loser, Time time, Place place, String fight_comment, int fight_length
-		
-		String names = db.requestString("SELECT UNIQUE TO_CHAR(TIME ,'YYYY-MM-DD HH24:MI:SS') FROM FIGHTS");
+				
+		String names = db.requestString("SELECT TO_CHAR(TIME ,'YYYY-MM-DD HH24:MI:SS') FROM FIGHTS");
 		String[] name = names.split("\n");
 		
 		String aName;
@@ -278,36 +310,56 @@ public class ObjectLists {
 		String fight_comment;
 		int fight_length;
 		
-		for(int i = 0 ; i < name.length ; i ++){
+		for(int i = 1 ; i < name.length + 1 ; i ++){
 
-			aName = db.requestString("SELECT UNIQUE FIGHTS.PLAYERA FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
+			aName = db.requestString("SELECT PLAYERA from (select f.PLAYERA, rownum r from FIGHTS f) where r = " + i);
 			a = findPlayer(aName);
 			
-			bName = db.requestString("SELECT UNIQUE FIGHTS.PLAYERB FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
+			bName = db.requestString("SELECT PLAYERB from (select f.PLAYERB, rownum r from FIGHTS f) where r = " + i);
 			b = findPlayer(bName);
 			
-			wName = db.requestString("SELECT UNIQUE FIGHTS.WINNER FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
+			wName = db.requestString("SELECT WINNER from (select f.WINNER, rownum r from FIGHTS f) where r = " + i);
 			w = findPlayer(wName);
 			
-			lName = db.requestString("SELECT UNIQUE FIGHTS.LOSER FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
+			lName = db.requestString("SELECT LOSER from (select f.LOSER, rownum r from FIGHTS f) where r = " + i);
 			l = findPlayer(lName);
 			
-			timing = db.requestString("SELECT UNIQUE TO_CHAR(FIGHTS.TIME ,'YYYY-MM-DD HH24:MI:SS') FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
+			timing = db.requestString("SELECT TO_CHAR(TIME ,'YYYY-MM-DD HH24:MI:SS') from (select f.TIME, rownum r from FIGHTS f) where r = " + i);
 			time = findTime(timing);
 
-			placeName = db.requestString("SELECT UNIQUE FIGHTS.PLACE FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
-			x = Integer.valueOf(db.requestString("SELECT UNIQUE FIGHTS.X FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')"));
-			y = Integer.valueOf(db.requestString("SELECT UNIQUE FIGHTS.Y FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')"));
+			placeName = db.requestString("SELECT PLACE from (select f.PLACE, rownum r from FIGHTS f) where r = " + i);
+			x = Integer.valueOf(db.requestString("SELECT X from (select f.X, rownum r from FIGHTS f) where r = " + i));
+			y = Integer.valueOf(db.requestString("SELECT Y from (select f.Y, rownum r from FIGHTS f) where r = " + i));
 			place = findPlace(placeName, x, y);
 			
-			fight_comment = db.requestString("SELECT UNIQUE FIGHTS.FIGHTCOMMENT FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')");
+			fight_comment = db.requestString("SELECT FIGHTCOMMENT from (select f.FIGHTCOMMENT, rownum r from FIGHTS f) where r = " + i);
 			
-			fight_length = Integer.valueOf(db.requestString("SELECT UNIQUE FIGHTS.FIGHTLENGTH FROM FIGHTS WHERE FIGHTS.TIME = TO_DATE('" + name[i] + "', 'YYYY-MM-DD HH24:MI:SS')"));
+			fight_length = Integer.valueOf(db.requestString("SELECT FIGHTLENGTH from (select f.FIGHTLENGTH, rownum r from FIGHTS f) where r = " + i));
 			
 			fights.add(new Fight(a, b, w, l, time, place, fight_comment, fight_length));
-			System.out.println("New fight Added : Player a : " + aName + " Player b :  " + bName + " Winner : " + wName + " Loser : " + lName + " Time : " + timing + " Place : " + placeName + " x : " + x + " y : " + y + " Fight Comment : " + fight_comment + " Fight Length : " + fight_length);
-			
+			System.out.println("New fight Added : Player a : " + a.getName() + " Player b :  " + b.getName() + " Winner : " + w.getName() + " Loser : " + l.getName() + " Time : " + timing + " Place : " + place.getName() + " x : " + x + " y : " + y + " Fight Comment : " + fight_comment + " Fight Length : " + fight_length);
+
 		}
+		
+	}
+	
+	public Fight findFight(String a, String b, String winner, String loser, String place, int x, int y, String time){
+		
+		if(fights.isEmpty()) return null;
+		
+		for(int i = 0 ; i < fights.size() ; i ++){
+
+			if(fights.get(i).getPlayerA().getName() == a && fights.get(i).getPlayerB().getName() == b && fights.get(i).getWinner().getName() == winner && fights.get(i).getLoser().getName() == loser && fights.get(i).getPlace().getName() == place && fights.get(i).getPlace().getX() == x && fights.get(i).getPlace().getY() == y && fights.get(i).getTime().getTiming() == time) return fights.get(i);
+						
+		}
+			
+		return null;
+		
+	}
+	
+	public void addFight(String a, String b, String winner, String loser, String place, int x, int y, String time, String fight_comment, int fight_length){
+		
+		fights.add(new Fight(findPlayer(a), findPlayer(b), findPlayer(winner), findPlayer(loser), findTime(time), findPlace(place, x, y), fight_comment, fight_length));
 		
 	}
 	

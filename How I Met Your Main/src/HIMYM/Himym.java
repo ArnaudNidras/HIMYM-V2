@@ -13,7 +13,7 @@ public class Himym {
 		Faction alliance = new Faction("Alliance");
 		Faction horde = new Faction("Horde");
 		
-		Player irinawen = new Player("Irinawen", new Guild("Le Petit Mehnir"), alliance, Classe.PALADIN, Specialization.RETRIBUTION, 152000, "Moi", 9, false);
+		Player irinawen = new Player("Irinawen", new Guild("Le Petit Mehnir", 0, 0), alliance, Classe.PALADIN, Specialization.RETRIBUTION, 152000, "Moi", 9, false);
 		//Player uxellodunon = new Player("Uxellodunon", new Guild("Le Petit Mehnir"), alliance, Class.DRUID, Specialization.FERAL, 0, "HANS ZELOT", 2, true);
 		
 		//Fight test = new Fight(irinawen, uxellodunon, irinawen, uxellodunon, new Time(2016, 03, 15, 13, 38, 24), new Place("I14", 5, 5), 4);

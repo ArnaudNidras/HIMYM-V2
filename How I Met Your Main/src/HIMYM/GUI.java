@@ -155,8 +155,12 @@ public class GUI extends JFrame implements ActionListener{
             	
             	db.checkAddGuild(guild.getText(), 0, 0);
             	
-            	db.requestString("INSERT INTO PLAYERS VALUES ('" + name.getText() + "','" + guild.getText() + "','" + faction.getText() + "','"  + classe.getText() + "','" + specialization.getText() + "'," + Integer.valueOf(nbgotkilled.getText()) + "," + Integer.valueOf(nbkilled.getText()) + "," + Integer.valueOf(hpleft.getText()) + ",'" + whisprage.getText() + "'," + Integer.valueOf(skill.getText()) + "," + Integer.valueOf(backped.getText()) + ",'" + skillcomment.getText() + "'"  + ")");
+            	boolean bp;
+            	if(backped.getText() == "0") bp = false;
+            	else bp = true;
             	
+            	db.checkAddPlayer(name.getText(), guild.getText(), faction.getText(), classe.getText(), specialization.getText(), Integer.valueOf(hpleft.getText()), skillcomment.getText(), Integer.valueOf(skill.getText()), bp, Integer.valueOf(nbgotkilled.getText()), Integer.valueOf(nbkilled.getText()), whisprage.getText());
+            	          	
             }
         });
 		
@@ -277,13 +281,48 @@ public class GUI extends JFrame implements ActionListener{
 		JTextField time = new JTextField("Date : AAAA-MO-DD HH:MI:SS");
 		JTextField fight_comment = new JTextField("Fight Comment");
 		JTextField fight_length = new JTextField("Fight length (s)");
+		JTextArea error = new JTextArea("");
 		
 		addFight = new JButton("Add Fight in database");
 		addFight.setName("addWindowButtonF");
 		addFight.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event2) {
 
-            	// db.checkAddTime(Integer.valueOf(year.getText()),Integer.valueOf(month.getText()), Integer.valueOf(day.getText()), Integer.valueOf(hour.getText()), Integer.valueOf(minute.getText()), Integer.valueOf(second.getText()));
+            	error.setText("");
+            	
+            	if(db.requestString("select name from players where name = '" + a.getText() + "'") == ""){
+
+            		error.append("You should add Player A before adding the fight !\n");
+
+            	}
+            	if(db.requestString("select name from players where name = '" + b.getText() + "'") == ""){
+
+            		error.append("You should add Player B before adding the fight !\n");
+
+            	}
+            	
+            	System.out.println("Error : " + error.getText());
+            	
+            	if(error.getText().isEmpty() == true){
+            		
+            		System.out.println("OKKKKKK");
+            		
+            		String[] tempo = place.getText().split("/");
+            		int x = Integer.valueOf(tempo[1]);
+            		int y = Integer.valueOf(tempo[2]);
+            		
+            		String[] tempa = time.getText().split("-|\\:|\\ ");
+            		System.out.println(tempo[0]);
+            		
+            		
+            		db.checkAddPlace(tempo[0], x, y);
+            		db.checkAddTime(Integer.valueOf(tempa[0]), Integer.valueOf(tempa[1]), Integer.valueOf(tempa[2]), Integer.valueOf(tempa[3]), Integer.valueOf(tempa[4]), Integer.valueOf(tempa[5]));
+            		db.checkPlayerDB(a.getText());
+            		db.checkPlayerDB(b.getText());
+            		
+            		db.checkAddFight(a.getText(), b.getText(), winner.getText(), loser.getText(), time.getText(), tempo[0], x, y, fight_comment.getText(), Integer.valueOf(fight_length.getText()));
+            		
+            	}
             	
             }
         });
@@ -299,6 +338,7 @@ public class GUI extends JFrame implements ActionListener{
 		fightPanel.add(fight_comment);
 		fightPanel.add(fight_length);
 		fightPanel.add(addFight);
+		fightPanel.add(error);
 		
 		fightPanel.revalidate();
 		

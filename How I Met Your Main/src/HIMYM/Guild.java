@@ -6,11 +6,11 @@ public class Guild {
 	private int nbGotKilled;
 	private int nbKilled;
 	
-	public Guild(String name){
+	public Guild(String name, int ngGotKilled, int nbKilled){
 		
 		this.name = name;
-		this.nbGotKilled = 0;
-		this.nbKilled = 0;
+		this.nbGotKilled = nbGotKilled;
+		this.nbKilled = nbKilled;
 		
 	}
 	
