@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -25,6 +27,9 @@ public class GUI extends JFrame implements ActionListener{
 	private JTextArea outputRequest;
 	private JButton sendRequest;
 	private JButton addWindowButton;
+	private JButton exportToTxt;
+	private JButton fightExplorerWindow;
+	private JButton statsWindow;
 	private JLabel input;
 	private JLabel output;
 	private JScrollPane scrollInput;
@@ -74,6 +79,15 @@ public class GUI extends JFrame implements ActionListener{
 		this.download = new JButton("Download Database");
 		this.download.setName("downloadDatabase");
 		this.download.addActionListener((ActionListener) this);
+		this.exportToTxt = new JButton("Export DB to .txt");
+		this.exportToTxt.setName("exportToTxt");
+		this.exportToTxt.addActionListener((ActionListener) this);
+		this.fightExplorerWindow = new JButton("Fights Explorer");
+		this.fightExplorerWindow.setName("fightExplorerWindow");
+		this.fightExplorerWindow.addActionListener((ActionListener) this);
+		this.statsWindow = new JButton("Statistics");
+		this.statsWindow.setName("statsWindow");
+		this.statsWindow.addActionListener((ActionListener) this);
 		
 		
 		this.mainFrame.setLayout(new GridLayout(5,2));
@@ -88,6 +102,9 @@ public class GUI extends JFrame implements ActionListener{
 		this.mainFrame.getContentPane().add(sendRequest);
 		this.mainFrame.getContentPane().add(addWindowButton);
 		this.mainFrame.getContentPane().add(download);
+		this.mainFrame.getContentPane().add(exportToTxt);
+		this.mainFrame.getContentPane().add(fightExplorerWindow);
+		this.mainFrame.getContentPane().add(statsWindow);
 		
 		this.mainFrame.setVisible(true);
 		
@@ -143,7 +160,6 @@ public class GUI extends JFrame implements ActionListener{
 		JTextField specialization = new JTextField("Specialization");
 		JTextField nbgotkilled = new JTextField("NbGotKilled");
 		JTextField nbkilled = new JTextField("NbKilled");
-		JTextField hpleft = new JTextField("HP Left (%)");
 		JTextField whisprage = new JTextField("Whisp Rage");
 		JTextField skill = new JTextField("Skill (x/10)");
 		JTextField backped = new JTextField("Backped (0/1)");
@@ -155,12 +171,16 @@ public class GUI extends JFrame implements ActionListener{
             	
             	db.checkAddGuild(guild.getText(), 0, 0);
             	
-            	boolean bp;
-            	if(backped.getText() == "0") bp = false;
-            	else bp = true;
+            	db.checkAddPlayer(name.getText(), guild.getText(), faction.getText(), classe.getText(), specialization.getText(), skillcomment.getText(), Integer.valueOf(skill.getText()), Integer.valueOf(backped.getText()), Integer.valueOf(nbgotkilled.getText()), Integer.valueOf(nbkilled.getText()), whisprage.getText());
+            	db.requestString("update CLASSES set CLASSES.NBGOTKILLED = CLASSES.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where CLASSES.NAME = '" + classe.getText() + "'");
+            	db.requestString("update CLASSES set CLASSES.NBKILLED = CLASSES.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where CLASSES.NAME = '" + classe.getText() + "'");
+            	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBGOTKILLED = SPECIALIZATIONS.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where SPECIALIZATIONS.NAME = '" + specialization.getText() + "'");
+            	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBKILLED = SPECIALIZATIONS.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where SPECIALIZATIONS.NAME = '" + specialization.getText() + "'");
+            	db.requestString("update GUILDS set GUILDS.NBGOTKILLED = GUILDS.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where GUILDS.NAME = '" + guild.getText() + "'");
+            	db.requestString("update GUILDS set GUILDS.NBKILLED = GUILDS.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where GUILDS.NAME = '" + guild.getText() + "'");
+            	db.requestString("update FACTIONS set FACTIONS.NBGOTKILLED = FACTIONS.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where FACTIONS.NAME = '" + faction.getText() + "'");
+            	db.requestString("update FACTIONS set FACTIONS.NBKILLED = FACTIONS.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where FACTIONS.NAME = '" + faction.getText() + "'");
             	
-            	db.checkAddPlayer(name.getText(), guild.getText(), faction.getText(), classe.getText(), specialization.getText(), Integer.valueOf(hpleft.getText()), skillcomment.getText(), Integer.valueOf(skill.getText()), bp, Integer.valueOf(nbgotkilled.getText()), Integer.valueOf(nbkilled.getText()), whisprage.getText());
-            	          	
             }
         });
 		
@@ -173,7 +193,6 @@ public class GUI extends JFrame implements ActionListener{
 		playerPanel.add(specialization);
 		playerPanel.add(nbgotkilled);
 		playerPanel.add(nbkilled);
-		playerPanel.add(hpleft);
 		playerPanel.add(whisprage);
 		playerPanel.add(skill);
 		playerPanel.add(backped);
@@ -281,6 +300,8 @@ public class GUI extends JFrame implements ActionListener{
 		JTextField time = new JTextField("Date : AAAA-MO-DD HH:MI:SS");
 		JTextField fight_comment = new JTextField("Fight Comment");
 		JTextField fight_length = new JTextField("Fight length (s)");
+		JTextField hplefta = new JTextField("HP Left Player A");
+		JTextField hpleftb = new JTextField("HP Left Player B");
 		JTextArea error = new JTextArea("");
 		
 		addFight = new JButton("Add Fight in database");
@@ -300,12 +321,32 @@ public class GUI extends JFrame implements ActionListener{
             		error.append("You should add Player B before adding the fight !\n");
 
             	}
+            	if(a.getText().matches(b.getText())){
+
+            		error.append("Player A should be different from Player B\n");
+
+            	}
+            	if(winner.getText().matches(loser.getText())){
+
+            		error.append("Winner should be different from Loser\n");
+
+            	}
+            	if(a.getText().matches(winner.getText()) == false && b.getText().matches(winner.getText()) == false && winner.getText().matches("") == false){
+
+            		error.append("Unknown Player assigned to Winner\n");
+
+            	}
+            	if(a.getText().matches(loser.getText()) == false && b.getText().matches(loser.getText()) == false && loser.getText().matches("") == false){
+
+            		error.append("Unknown Player assigned to Loser\n");
+
+            	}
             	
-            	System.out.println("Error : " + error.getText());
+            	//System.out.println("Error : " + error.getText());
             	
             	if(error.getText().isEmpty() == true){
             		
-            		System.out.println("OKKKKKK");
+            		//System.out.println("OKKKKKK");
             		
             		String[] tempo = place.getText().split("/");
             		int x = Integer.valueOf(tempo[1]);
@@ -320,8 +361,19 @@ public class GUI extends JFrame implements ActionListener{
             		db.checkPlayerDB(a.getText());
             		db.checkPlayerDB(b.getText());
             		
-            		db.checkAddFight(a.getText(), b.getText(), winner.getText(), loser.getText(), time.getText(), tempo[0], x, y, fight_comment.getText(), Integer.valueOf(fight_length.getText()));
+            		db.checkAddFight(a.getText(), b.getText(), winner.getText(), loser.getText(), time.getText(), tempo[0], x, y, fight_comment.getText(), Integer.valueOf(fight_length.getText()), Integer.valueOf(hplefta.getText()), Integer.valueOf(hpleftb.getText()));
             		
+            		db.requestString("update CLASSES set CLASSES.NBGOTKILLED = CLASSES.NBGOTKILLED + 1 where CLASSES.NAME = '" + db.objectLists.findPlayer(loser.getText()).getClasse().getName() + "'");
+                	db.requestString("update CLASSES set CLASSES.NBKILLED = CLASSES.NBKILLED + 1 where CLASSES.NAME = '" + db.objectLists.findPlayer(winner.getText()).getClasse().getName() + "'");
+                	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBGOTKILLED = SPECIALIZATIONS.NBGOTKILLED + 1 where SPECIALIZATIONS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getSpecialization().getName() + "'");
+                	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBKILLED = SPECIALIZATIONS.NBKILLED + 1 where SPECIALIZATIONS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getSpecialization().getName() + "'");
+                	db.requestString("update GUILDS set GUILDS.NBGOTKILLED = GUILDS.NBGOTKILLED + 1 where GUILDS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getGuild().getName() + "'");
+                	db.requestString("update GUILDS set GUILDS.NBKILLED = GUILDS.NBKILLED + 1 where GUILDS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getGuild().getName() + "'");
+                	db.requestString("update PLAYERS set PLAYERS.NBGOTKILLED = PLAYERS.NBGOTKILLED + 1 where PLAYERS.NAME = '" + db.objectLists.findPlayer(loser.getText()) + "'");
+                	db.requestString("update PLAYERS set PLAYERS.NBKILLED = PLAYERS.NBKILLED + 1 where PLAYERS.NAME = '" + db.objectLists.findPlayer(winner.getText()) + "'");
+                	db.requestString("update FACTIONS set FACTIONS.NBGOTKILLED = FACTIONS.NBGOTKILLED + 1 where FACTIONS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getFaction().getName() + "'");
+                	db.requestString("update FACTIONS set FACTIONS.NBKILLED = FACTIONS.NBKILLED + 1 where FACTIONS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getFaction().getName() + "'");
+                	
             	}
             	
             }
@@ -331,6 +383,8 @@ public class GUI extends JFrame implements ActionListener{
 		
 		fightPanel.add(a);
 		fightPanel.add(b);
+		fightPanel.add(hplefta);
+		fightPanel.add(hpleftb);
 		fightPanel.add(winner);
 		fightPanel.add(loser);
 		fightPanel.add(place);
@@ -350,6 +404,14 @@ public class GUI extends JFrame implements ActionListener{
 		if(event.getSource() == sendRequest) outputRequest.setText(db.requestString(inputRequest.getText()));
 		if(event.getSource() == addWindowButton) toggleAddWindow();
 		if(event.getSource() == download) db.objectLists.loadEverything();
+		if(event.getSource() == exportToTxt)
+			try {
+				db.objectLists.export();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 		
 		if(event.getSource() == list && (String)list.getSelectedItem() == "Player"){
 			

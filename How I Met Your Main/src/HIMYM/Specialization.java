@@ -64,13 +64,13 @@ public enum Specialization {
 		
 	}
 	
-	public String GetName(){
+	public String getName(){
 		
 			return name;
 		
 		}
 
-	public String GetRole(){
+	public String getRole(){
 		
 			return role;
 		

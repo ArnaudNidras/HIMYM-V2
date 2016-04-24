@@ -11,8 +11,10 @@ public class Fight {
 	private Place place;
 	private String fight_comment;
 	private int fight_length;
+	private int hpLeftA;
+	private int hpLeftB;
 	
-	public Fight(Player a, Player b, Player winner, Player loser, Time time, Place place, String fight_comment, int fight_length){
+	public Fight(Player a, Player b, Player winner, Player loser, Time time, Place place, String fight_comment, int fight_length, int hplefta, int hpleftb){
 		
 		this.a = a;
 		this.b = b;
@@ -22,6 +24,8 @@ public class Fight {
 		this.place = place;
 		this.fight_comment = fight_comment;
 		this.fight_length = fight_length;
+		this.hpLeftA = hplefta;
+		this.hpLeftB = hpleftb;
 		
 		
 	}
@@ -69,7 +73,7 @@ public class Fight {
 		
 	}
 	
-	public String fight_comment(){
+	public String getFight_comment(){
 		
 		return fight_comment;
 		
@@ -79,6 +83,30 @@ public class Fight {
 		
 		return fight_length;
 		
+	}
+	
+	public void setHPLeftA(int hpLeft) {
+
+		this.hpLeftA = hpLeft;
+
+	}
+
+	public int getHPLeftA() {
+
+		return hpLeftA;
+
+	}
+	
+	public void setHPLeftB(int hpLeft) {
+
+		this.hpLeftB = hpLeft;
+
+	}
+
+	public int getHPLeftB() {
+
+		return hpLeftB;
+
 	}
 
 }

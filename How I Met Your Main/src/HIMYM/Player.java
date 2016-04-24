@@ -9,13 +9,13 @@ public class Player {
 	private Specialization specialization;
 	private int nbGotKilled;
 	private int nbKilled;
-	private int hpLeft;
+	//private int hpLeft;
 	private WhispRage whisprage;
 	private int skill; // à rentrer à la main sur l'addon
 	private boolean backped;
 	private String skill_comment;
 
-	public Player(String name, Guild guild, Faction faction, Classe classe, Specialization specialization, int hpLeft,
+	public Player(String name, Guild guild, Faction faction, Classe classe, Specialization specialization, /*int hpLeft,*/
 			String comment, int skill, boolean backped) {
 
 		this.name = name;
@@ -25,11 +25,11 @@ public class Player {
 		this.specialization = specialization;
 		this.nbGotKilled = 0;
 		this.nbKilled = 0;
-		this.hpLeft = hpLeft;
+		//this.hpLeft = hpLeft;
 		this.whisprage = null;
 		this.skill = skill;
 		this.backped = backped;
-		this.skill_comment = "";
+		this.skill_comment = comment;
 
 	}
 
@@ -87,7 +87,7 @@ public class Player {
 
 	}
 
-	public void setHPLeft(int hpLeft) {
+	/*public void setHPLeft(int hpLeft) {
 
 		this.hpLeft = hpLeft;
 
@@ -97,7 +97,7 @@ public class Player {
 
 		return hpLeft;
 
-	}
+	}*/
 
 	public WhispRage getWhispRage() {
 

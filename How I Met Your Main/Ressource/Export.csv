@@ -1,0 +1,94 @@
+;GUILDS
+Name;Got killed;Has killed
+
+Le Petit Menhir;0;2
+Les Dragons dazeroth;0;17
+ZeratorTV;0;2
+
+;PLAYERS
+Name;Guild;Faction;Classe;Specialization;Skill Comment;Skill x/10;Back Pedal;Got killed;Has killed
+
+Apocalyps;Les Dragons dazeroth;Alliance;Warrior;Fury;Old me;10;false;0;0
+Irinawen;Le Petit Menhir;Alliance;Paladin;Retribution;Bah moi quoi #ego;8;false;0;0
+Uxellodunon;Le Petit Menhir;Alliance;Druid;Feral;Sauvage Player;9;false;0;0
+Zerator;ZeratorTV;Horde;Paladin;Holy;ZrTMoney;6;false;0;0
+
+;TIMES
+Timing;Year;Month;Day;Hour;Minute;Second
+
+0123-01-01 01:01:01;123;1;1;1;1;1
+1234-01-01 01:01:01;1234;1;1;1;1;1
+1996-02-20 01:02:03;1996;2;20;1;2;3
+2010-10-10 10:10:10;2010;10;10;10;10;10
+2012-12-12 12:12:12;2012;12;12;12;12;12
+2012-12-13 12:12:12;2012;12;13;12;12;12
+2013-01-01 01:01:01;2013;1;1;1;1;1
+2016-01-02 03:04:05;2016;1;2;3;4;5
+2016-03-31 01:02:03;2016;3;31;1;2;3
+2016-03-31 15:40:21;2016;3;31;15;40;21
+2016-04-14 15:40:21;2016;4;14;15;40;21
+2016-04-15 02:08:40;2016;4;15;2;8;40
+2016-04-21 15:09:52;2016;4;21;15;9;52
+2016-04-22 00:36:57;2016;4;22;0;36;57
+2016-04-22 03:42:26;2016;4;22;3;42;26
+2016-04-22 15:01:22;2016;4;22;15;1;22
+2016-04-22 15:18:27;2016;4;22;15;18;27
+2016-04-22 15:46:23;2016;4;22;15;46;23
+2016-04-23 01:02:03;2016;4;23;1;2;3
+2016-04-23 01:05:32;2016;4;23;1;5;32
+2016-04-24 18:41:53;2016;4;24;18;41;53
+2016-04-24 21:12:41;2016;4;24;21;12;41
+2016-05-23 01:02:03;2016;5;23;1;2;3
+2017-05-23 05:11:58;2017;5;23;5;11;58
+3210-10-10 10:10:10;3210;10;10;10;10;10
+
+;PLACES
+Name;X Coordinate;Y Coordinate
+
+BWL;1;2
+Dalaran;12;3
+Dalaran;54;67
+Darnassus;1;5
+Darnassus;42;87
+Durator;1;1
+Durator;1;2
+Durotar;1;2
+Durotar;1;21
+Durotar;20;30
+Durotar;30;50
+Exodar;1;2
+Exodar;2;4
+Exodar;4;5
+Garrison;2;52
+Garrison;50;46
+IF;54;78
+Ironforge;7;8
+Ironforge;12;36
+Naxxramas;1;2
+SW;1;2
+Shattrath;1;2
+Shattrath;12;34
+Stormwind;12;45
+TB;1;2
+Tanaris;27;43
+UC;1;2
+UD;12;23
+Ulduar;1;2
+ZF;12;34
+ZG;5;5
+lol;1;1
+
+;FIGHTS
+Player A;Player B;Winner;Loser;Time;Place;X Coordinate;Y Coordinate;Fight Comment;Fight Length;HP Left Player A;HP Left Player B
+
+Apocalyps;Zerator;Zerator;Apocalyps;2016-04-24 18:41:53;Dalaran;54;67;REKT;9;0;37
+Apocalyps;Irinawen;Irinawen;Apocalyps;2016-04-24 21:12:41;IF;54;78;Try;13;0;74
+Apocalyps;Irinawen;Irinawen;Apocalyps;3210-10-10 10:10:10;Durotar;1;2;Fight Comment;10;0;57
+Irinawen;Zerator;Irinawen;Zerator;2012-12-12 12:12:12;Naxxramas;1;2;Fight Comment;14;83;0
+Irinawen;Zerator;Irinawen;Zerator;2016-04-22 15:01:22;Exodar;4;5;Fight Comment;23;48;0
+Irinawen;Zerator;Irinawen;Zerator;2012-12-12 12:12:12;Naxxramas;1;2;Fight Comment;14;89;0
+Apocalyps;Zerator;Apocalyps;Zerator;2012-12-12 12:12:12;TB;1;2;Fight Comment;12;24;0
+Zerator;Irinawen;Zerator;Irinawen;2012-12-12 12:12:12;lol;1;1;Fight Comment;12;6;0
+Apocalyps;Zerator;Apocalyps;Zerator;2012-12-12 12:12:12;BWL;1;2;Fight Comment;12;37;0
+Irinawen;Apocalyps;Irinawen;Apocalyps;2016-04-23 01:05:32;Garrison;50;46;Fight Comment;123;78;0
+Irinawen;Zerator;Irinawen;Zerator;2012-12-12 12:12:12;Ulduar;1;2;Fight Comment;12;94;0

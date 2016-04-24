@@ -1,5 +1,9 @@
 package HIMYM;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.LinkedList;
 
@@ -7,6 +11,7 @@ import java.util.LinkedList;
 public class ObjectLists {
 
 	private Db db;
+	private boolean downloaded;
 	
 	private LinkedList<Guild> guilds;
 	private LinkedList<Player> players;
@@ -18,6 +23,7 @@ public class ObjectLists {
 	public ObjectLists(Db db) throws ClassNotFoundException{
 		
 		this.db = db;
+		this.downloaded = false;
 		
 		this.guilds = new LinkedList<Guild>();
 		this.factions = new LinkedList<Faction>();
@@ -25,6 +31,9 @@ public class ObjectLists {
 		this.places = new LinkedList<Place>();
 		this.times = new LinkedList<Time>();
 		this.fights = new LinkedList<Fight>();
+		
+		this.factions.add(new Faction("Alliance"));
+		this.factions.add(new Faction("Horde"));
 		
 	}
 	
@@ -49,7 +58,7 @@ public class ObjectLists {
 		initPlaces();
 		initTimes();
 		initFights();
-		
+		downloaded = true;
 		
 	}
 	
@@ -60,6 +69,212 @@ public class ObjectLists {
 		places.clear();
 		times.clear();
 		fights.clear();
+		downloaded = false;
+		
+	}
+	
+	public void export() throws IOException{
+		
+		int i = 0;
+		
+		if(downloaded == false) loadEverything();
+		
+		FileWriter export = new FileWriter("Ressource/Export.csv");
+		
+		export.append(';');
+		export.append("GUILDS\n");
+		export.append("Name");
+		export.append(';');
+		export.append("Got killed");
+		export.append(';');
+		export.append("Has killed");
+		export.append("\n\n");
+		
+		for(i = 0 ; i < guilds.size() ; i ++){
+			
+			export.append(guilds.get(i).getName());
+			export.append(';');
+			export.append(Integer.toString(guilds.get(i).getGotKilled()));
+			export.append(';');
+			export.append(Integer.toString(guilds.get(i).getKilled()));
+			export.append("\n");
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("PLAYERS\n");
+		export.append("Name");
+		export.append(';');
+		export.append("Guild");
+		export.append(';');
+		export.append("Faction");
+		export.append(';');
+		export.append("Classe");
+		export.append(';');
+		export.append("Specialization");
+		export.append(';');
+		export.append("Skill Comment");
+		export.append(';');
+		export.append("Skill x/10");
+		export.append(';');
+		export.append("Back Pedal");
+		export.append(';');
+		export.append("Got killed");
+		export.append(';');
+		export.append("Has killed");
+		export.append("\n\n");
+		
+		for(i = 0 ; i < players.size() ; i ++){
+			
+			export.append(players.get(i).getName());
+			export.append(';');
+			export.append(players.get(i).getGuild().getName());
+			export.append(';');
+			export.append(players.get(i).getFaction().getName());
+			export.append(';');
+			export.append(players.get(i).getClasse().getName());
+			export.append(';');
+			export.append(players.get(i).getSpecialization().getName());
+			export.append(';');
+			export.append(players.get(i).getSkill_comment());
+			export.append(';');
+			export.append(Integer.toString(players.get(i).getSkill()));
+			export.append(';');
+			export.append(Boolean.toString(players.get(i).getBackped()));
+			export.append(';');
+			export.append(Integer.toString(players.get(i).getGotKilled()));
+			export.append(';');
+			export.append(Integer.toString(players.get(i).getKilled()));
+			export.append("\n");
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("TIMES\n");
+		export.append("Timing");
+		export.append(';');
+		export.append("Year");
+		export.append(';');
+		export.append("Month");
+		export.append(';');
+		export.append("Day");
+		export.append(';');
+		export.append("Hour");
+		export.append(';');
+		export.append("Minute");
+		export.append(';');
+		export.append("Second");
+		export.append("\n\n");
+		
+		for(i = 0 ; i < times.size() ; i ++){
+			
+			export.append(times.get(i).getTiming());
+			export.append(';');
+			export.append(Integer.toString(times.get(i).getYear()));
+			export.append(';');
+			export.append(Integer.toString(times.get(i).getMonth()));
+			export.append(';');
+			export.append(Integer.toString(times.get(i).getDay()));
+			export.append(';');
+			export.append(Integer.toString(times.get(i).getHour()));
+			export.append(';');
+			export.append(Integer.toString(times.get(i).getMinute()));
+			export.append(';');
+			export.append(Integer.toString(times.get(i).getSecond()));
+			export.append("\n");
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("PLACES\n");
+		export.append("Name");
+		export.append(';');
+		export.append("X Coordinate");
+		export.append(';');
+		export.append("Y Coordinate");
+		export.append("\n\n");
+		
+		for(i = 0 ; i < places.size() ; i ++){
+			
+			export.append(places.get(i).getName());
+			export.append(';');
+			export.append(Integer.toString(places.get(i).getX()));
+			export.append(';');
+			export.append(Integer.toString(places.get(i).getY()));
+			export.append("\n");
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("FIGHTS\n");
+		export.append("Player A");
+		export.append(';');
+		export.append("Player B");
+		export.append(';');
+		export.append("Winner");
+		export.append(';');
+		export.append("Loser");
+		export.append(';');
+		export.append("Time");
+		export.append(';');
+		export.append("Place");
+		export.append(';');
+		export.append("X Coordinate");
+		export.append(';');
+		export.append("Y Coordinate");
+		export.append(';');
+		export.append("Fight Comment");
+		export.append(';');
+		export.append("Fight Length");
+		export.append(';');
+		export.append("HP Left Player A");
+		export.append(';');
+		export.append("HP Left Player B");
+		export.append("\n\n");
+		
+		for(i = 0 ; i < fights.size() ; i ++){
+			
+			export.append(fights.get(i).getPlayerA().getName());
+			export.append(';');
+			export.append(fights.get(i).getPlayerB().getName());
+			export.append(';');
+			export.append(fights.get(i).getWinner().getName());
+			export.append(';');
+			export.append(fights.get(i).getLoser().getName());
+			export.append(';');
+			export.append(fights.get(i).getTime().getTiming());
+			export.append(';');
+			export.append(fights.get(i).getPlace().getName());
+			export.append(';');
+			export.append(Integer.toString(fights.get(i).getPlace().getX()));
+			export.append(';');
+			export.append(Integer.toString(fights.get(i).getPlace().getY()));
+			export.append(';');
+			export.append(fights.get(i).getFight_comment());
+			export.append(';');
+			export.append(Integer.toString(fights.get(i).getFight_length()));
+			export.append(';');
+			export.append(Integer.toString(fights.get(i).getHPLeftA()));
+			export.append(';');
+			export.append(Integer.toString(fights.get(i).getHPLeftB()));
+			export.append("\n");
+			
+		}
+		
+		export.flush();
+		export.close();
+		
+		cleanEverything();
+		
+
 		
 	}
 	
@@ -87,7 +302,7 @@ public class ObjectLists {
 		
 		for(int i = 0 ; i < guilds.size() ; i ++){
 			
-			if(guilds.get(i).getName() == name) return guilds.get(i);
+			if(guilds.get(i).getName().matches(name)) return guilds.get(i);
 			
 		}
 			
@@ -122,7 +337,7 @@ public class ObjectLists {
 		
 		for(int i = 0 ; i < factions.size() ; i ++){
 			
-			if(factions.get(i).getName() == name) return factions.get(i);
+			if(factions.get(i).getName().matches(name)) return factions.get(i);
 			
 		}
 			
@@ -143,7 +358,7 @@ public class ObjectLists {
 		Classe classe;
 		String specializationName;
 		Specialization specialization;
-		int hpLeft;
+		//int hpLeft;
 		String comment;
 		int skill;
 		boolean backped;
@@ -168,7 +383,7 @@ public class ObjectLists {
 			specializationName = db.requestString("SELECT PLAYERS.SPECIALIZATION FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'").toUpperCase();
 			specialization = Specialization.valueOf(specializationName);
 			
-			hpLeft = Integer.valueOf(db.requestString("SELECT PLAYERS.HPLEFT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
+			//hpLeft = Integer.valueOf(db.requestString("SELECT PLAYERS.HPLEFT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
 			
 			comment = db.requestString("SELECT PLAYERS.SKILLCOMMENT FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
 			
@@ -176,8 +391,8 @@ public class ObjectLists {
 			
 			backped = Boolean.valueOf(db.requestString("SELECT PLAYERS.BACKPED FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
 			
-			players.add(new Player(names, guild, faction, classe, specialization, hpLeft, comment, skill, backped));
-			System.out.println("New player Added : Name : " + names + " Guilde : " + guildName + " Faction : " + factionName + " Class : " + classeName + " Specialization : " + specializationName + " hpLeft : " + hpLeft + " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
+			players.add(new Player(names, guild, faction, classe, specialization, /*hpLeft,*/ comment, skill, backped));
+			System.out.println("New player Added : Name : " + names + " Guilde : " + guild.getName() + " Faction : " + faction.getName() + " Class : " + classe.getName() + " Specialization : " + specialization.getName() + /*" hpLeft : " + hpLeft +*/ " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
 			
 		}
 
@@ -197,10 +412,10 @@ public class ObjectLists {
 		
 	}
 
-	public void addPlayer(String name, String guild, String faction, String classe, String specialization, int hpLeft,
+	public void addPlayer(String name, String guild, String faction, String classe, String specialization, /*int hpLeft,*/
 			String comment, int skill, boolean backped){
 		
-		players.add(new Player(name, findGuild(guild), findFaction(faction), Classe.valueOf(classe.toUpperCase()), Specialization.valueOf(specialization.toUpperCase()), hpLeft, comment, skill, backped));
+		players.add(new Player(name, findGuild(guild), findFaction(faction), Classe.valueOf(classe.toUpperCase()), Specialization.valueOf(specialization.toUpperCase())/*, hpLeft*/, comment, skill, backped));
 				
 	}
 	
@@ -309,6 +524,8 @@ public class ObjectLists {
 		Place place;
 		String fight_comment;
 		int fight_length;
+		int hpLeftA;
+		int hpLeftB;
 		
 		for(int i = 1 ; i < name.length + 1 ; i ++){
 
@@ -336,20 +553,24 @@ public class ObjectLists {
 			
 			fight_length = Integer.valueOf(db.requestString("SELECT FIGHTLENGTH from (select f.FIGHTLENGTH, rownum r from FIGHTS f) where r = " + i));
 			
-			fights.add(new Fight(a, b, w, l, time, place, fight_comment, fight_length));
-			System.out.println("New fight Added : Player a : " + a.getName() + " Player b :  " + b.getName() + " Winner : " + w.getName() + " Loser : " + l.getName() + " Time : " + timing + " Place : " + place.getName() + " x : " + x + " y : " + y + " Fight Comment : " + fight_comment + " Fight Length : " + fight_length);
+			hpLeftA = Integer.valueOf(db.requestString("SELECT HPLEFTA from (select f.HPLEFTA, rownum r from FIGHTS f) where r = " + i));
+			
+			hpLeftB = Integer.valueOf(db.requestString("SELECT HPLEFTB from (select f.HPLEFTB, rownum r from FIGHTS f) where r = " + i));
+			
+			fights.add(new Fight(a, b, w, l, time, place, fight_comment, fight_length, hpLeftA, hpLeftB));
+			System.out.println("New fight Added : Player a : " + a.getName() + " Player b :  " + b.getName() + " Winner : " + w.getName() + " Loser : " + l.getName() + " Time : " + timing + " Place : " + place.getName() + " x : " + x + " y : " + y + " Fight Comment : " + fight_comment + " Fight Length : " + fight_length + " HPLeftA : " + hpLeftA + " HPLeftB : " + hpLeftB);
 
 		}
 		
 	}
 	
-	public Fight findFight(String a, String b, String winner, String loser, String place, int x, int y, String time){
+	public Fight findFight(String a, String b, String winner, String loser, String place, int x, int y, String time, int hplefta, int hpleftb){
 		
 		if(fights.isEmpty()) return null;
 		
 		for(int i = 0 ; i < fights.size() ; i ++){
 
-			if(fights.get(i).getPlayerA().getName() == a && fights.get(i).getPlayerB().getName() == b && fights.get(i).getWinner().getName() == winner && fights.get(i).getLoser().getName() == loser && fights.get(i).getPlace().getName() == place && fights.get(i).getPlace().getX() == x && fights.get(i).getPlace().getY() == y && fights.get(i).getTime().getTiming() == time) return fights.get(i);
+			if(fights.get(i).getPlayerA().getName().matches(a) && fights.get(i).getPlayerB().getName().matches(b) && fights.get(i).getWinner().getName().matches(winner) && fights.get(i).getLoser().getName().matches(loser) && fights.get(i).getPlace().getName().matches(place) && fights.get(i).getPlace().getX() == x && fights.get(i).getPlace().getY() == y && fights.get(i).getTime().getTiming().matches(time) && fights.get(i).getHPLeftA() == hplefta && fights.get(i).getHPLeftB() == hpleftb) return fights.get(i);
 						
 		}
 			
@@ -357,9 +578,9 @@ public class ObjectLists {
 		
 	}
 	
-	public void addFight(String a, String b, String winner, String loser, String place, int x, int y, String time, String fight_comment, int fight_length){
+	public void addFight(String a, String b, String winner, String loser, String place, int x, int y, String time, String fight_comment, int fight_length, int hplefta, int hpleftb){
 		
-		fights.add(new Fight(findPlayer(a), findPlayer(b), findPlayer(winner), findPlayer(loser), findTime(time), findPlace(place, x, y), fight_comment, fight_length));
+		fights.add(new Fight(findPlayer(a), findPlayer(b), findPlayer(winner), findPlayer(loser), findTime(time), findPlace(place, x, y), fight_comment, fight_length, hplefta, hpleftb));
 		
 	}
 	
