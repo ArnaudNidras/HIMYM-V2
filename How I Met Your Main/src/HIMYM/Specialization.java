@@ -4,10 +4,10 @@ public enum Specialization {
 
 	ARMS("Arms", "DPS"),
 	FURY("Fury", "DPS"),
-	PROTECTIONW("Protection", "Tank"),
+	PROTECTIONW("Protectionw", "Tank"),
 	
-	HOLYPA("Holy", "Healer"),
-	PROTECTIONP("Protection", "Tank"),
+	HOLYPA("Holypâ", "Healer"),
+	PROTECTIONP("Protectionp", "Tank"),
 	RETRIBUTION("Retribution", "DPS"),
 	
 	BEASTMASTERY("Beast Mastery", "DPS"),
@@ -19,20 +19,20 @@ public enum Specialization {
 	SUBTLETY("Subtlety", "DPS"),
 	
 	DISCIPLINE("Discipline", "Healer"),
-	HOLYPR("Holy", "Healer"),
+	HOLYPR("Holypr", "Healer"),
 	SHADOW("Shadow", "DPS"),
 	
 	BLOOD("Blood", "Tank"),
-	FROSTD("Frost", "DPS"),
+	FROSTD("Frostd", "DPS"),
 	UNHOLY("Unholy", "DPS"),
 	
 	ELEMENTAL("Elemental", "DPS"),
 	ENHANCEMENT("Enhancement", "DPS"),
-	RESTORATIONS("Restoration", "Healer"),
+	RESTORATIONS("Restorations", "Healer"),
 	
 	ARCANE("Arcane", "DPS"),
 	FIRE("Fire", "DPS"),
-	FROSTM("Frost", "DPS"),
+	FROSTM("Frostm", "DPS"),
 	
 	AFFLICTION("Affliction", "DPS"),
 	DEMONOLOGY("Demonology", "DPS"),
@@ -45,7 +45,7 @@ public enum Specialization {
 	BALANCE("Balance", "DPS"),
 	FERAL("Feral", "DPS"),
 	GUARDIAN("Guardian", "Tank"),
-	RESTORATIOND("Restoration", "Healer"),
+	RESTORATIOND("Restorationd", "Healer"),
 	
 	HAVOC("Havoc", "DPS"),
 	VENGEANCE("Vengeance", "Tank");

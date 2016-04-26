@@ -6,6 +6,8 @@ public class Stats {
 		
 		//nbkilled
 		//nbgotkilled
+		
+		//add by role
 		/*
 		 * player -> player
 		 * player -> class

@@ -53,6 +53,8 @@ public class GUI extends JFrame implements ActionListener{
 	private JPanel timePanel;
 	private JPanel fightPanel;
 	
+	private JFrame fightExplorer;
+	
 	
 	public GUI(Db db){
 		
@@ -122,7 +124,7 @@ public class GUI extends JFrame implements ActionListener{
 		
 	}
 	
-	void toggleAddWindow(){
+	public void toggleAddWindow(){
 		
 		addWindow = new JFrame("Add in database");
 		addWindow.setSize(430, 240);
@@ -137,6 +139,17 @@ public class GUI extends JFrame implements ActionListener{
 		list.addActionListener((ActionListener) this);
 		
 		addWindow.setVisible(true);
+		
+	}
+	
+	public void toggleFightExplorer(){
+		
+		fightExplorer = new JFrame("Fight Explorer");
+		fightExplorer.setSize(430, 240);
+		fightExplorer.setResizable(true);
+		fightExplorer.setLayout(new BorderLayout());
+		
+		fightExplorer.setVisible(true);
 		
 	}
 	
@@ -369,8 +382,8 @@ public class GUI extends JFrame implements ActionListener{
                 	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBKILLED = SPECIALIZATIONS.NBKILLED + 1 where SPECIALIZATIONS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getSpecialization().getName() + "'");
                 	db.requestString("update GUILDS set GUILDS.NBGOTKILLED = GUILDS.NBGOTKILLED + 1 where GUILDS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getGuild().getName() + "'");
                 	db.requestString("update GUILDS set GUILDS.NBKILLED = GUILDS.NBKILLED + 1 where GUILDS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getGuild().getName() + "'");
-                	db.requestString("update PLAYERS set PLAYERS.NBGOTKILLED = PLAYERS.NBGOTKILLED + 1 where PLAYERS.NAME = '" + db.objectLists.findPlayer(loser.getText()) + "'");
-                	db.requestString("update PLAYERS set PLAYERS.NBKILLED = PLAYERS.NBKILLED + 1 where PLAYERS.NAME = '" + db.objectLists.findPlayer(winner.getText()) + "'");
+                	db.requestString("update PLAYERS set PLAYERS.NBGOTKILLED = PLAYERS.NBGOTKILLED + 1 where PLAYERS.NAME = '" + loser.getText() + "'");
+                	db.requestString("update PLAYERS set PLAYERS.NBKILLED = PLAYERS.NBKILLED + 1 where PLAYERS.NAME = '" + winner.getText() + "'");
                 	db.requestString("update FACTIONS set FACTIONS.NBGOTKILLED = FACTIONS.NBGOTKILLED + 1 where FACTIONS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getFaction().getName() + "'");
                 	db.requestString("update FACTIONS set FACTIONS.NBKILLED = FACTIONS.NBKILLED + 1 where FACTIONS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getFaction().getName() + "'");
                 	
@@ -411,7 +424,7 @@ public class GUI extends JFrame implements ActionListener{
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+		if(event.getSource() == fightExplorerWindow) toggleFightExplorer();	
 		
 		if(event.getSource() == list && (String)list.getSelectedItem() == "Player"){
 			
