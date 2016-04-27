@@ -21,10 +21,10 @@ public class Db {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
 			
-			this.username = "HIMYM";
-			this.password = "HIMYM"; 
+			this.username = "";
+			this.password = ""; 
 			
-			this.con = DriverManager.getConnection("jdbc:oracle:thin:@ns202518.ovh.net:1521:xe",username,password);
+			this.con = DriverManager.getConnection("jdbc:oracle:thin::1521:xe",username,password);
 			//this.con = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:5000:xe",username,password);		
 			
 		}
@@ -44,7 +44,7 @@ public class Db {
 			DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
 			
 			//con = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe",username,password);
-			con = DriverManager.getConnection("jdbc:oracle:thin:@ns202518.ovh.net:1521:xe",username,password);
+			con = DriverManager.getConnection("jdbc:oracle:thin::1521:xe",username,password);
 			
 		}
 		
