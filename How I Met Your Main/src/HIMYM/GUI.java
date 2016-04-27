@@ -54,7 +54,8 @@ public class GUI extends JFrame implements ActionListener{
 	private JPanel fightPanel;
 	
 	private JFrame fightExplorer;
-	
+	private String[] afe, bfe, wfe, lfe, hpLeftAfe, hpLeftBfe, placefe, xfe, yfe, timefe, fight_commentfe, fight_lengthfe;
+	int ife;
 	
 	public GUI(Db db){
 		
@@ -122,6 +123,8 @@ public class GUI extends JFrame implements ActionListener{
 		this.addTime = new JButton("Add Time !");
 		this.addFight = new JButton("Add Fight !");
 		
+		this.ife = 0;
+		
 	}
 	
 	public void toggleAddWindow(){
@@ -145,9 +148,110 @@ public class GUI extends JFrame implements ActionListener{
 	public void toggleFightExplorer(){
 		
 		fightExplorer = new JFrame("Fight Explorer");
-		fightExplorer.setSize(430, 240);
+		fightExplorer.setSize(820, 240);
 		fightExplorer.setResizable(true);
 		fightExplorer.setLayout(new BorderLayout());
+		JPanel res = new JPanel(new BorderLayout());
+		JTextArea resultBox = new JTextArea("");
+		JTextField toSearch = new JTextField("Enter a name (guild, player, class, specialization, place, faction) or a date AAAA-MO-DD and set the type above.");
+		String[] types = { "PLAYERS", "GUILDS", "PLACES", "TIMES", "FIGHTS", "CLASSES", "SPECIALIZATIONS", "FACTIONS" };
+		JComboBox type = new JComboBox(types);
+		JButton previous = new JButton("Previous");
+		JButton next = new JButton("Next");
+		type.setSelectedIndex(-1);
+		resultBox.setEditable(false);
+		ife = 0;
+		
+		res.add(previous, BorderLayout.WEST);
+		res.add(next, BorderLayout.EAST);
+		res.add(resultBox, BorderLayout.CENTER);
+		fightExplorer.getContentPane().add(res, BorderLayout.SOUTH);
+		fightExplorer.getContentPane().add(toSearch, BorderLayout.CENTER);
+		fightExplorer.getContentPane().add(type, BorderLayout.NORTH);
+		
+		JButton search = new JButton("Search in database");
+		search.setName("searchButton");
+		fightExplorer.getContentPane().add(search, BorderLayout.EAST);
+		
+		search.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event2) {
+            	
+            	if(type.getSelectedItem() == "PLAYERS"){
+            		
+            		resultBox.setText("");
+            		ife = 0;
+            		
+            		//afe = db.requestString("select playera from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		//bfe = db.requestString("select playerb from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		wfe = db.requestString("select winner from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		lfe = db.requestString("select loser from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		hpLeftAfe = db.requestString("select hplefta from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		hpLeftBfe = db.requestString("select hpleftb from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		placefe = db.requestString("select place from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		xfe = db.requestString("select x from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		yfe = db.requestString("select y from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		timefe = db.requestString("select time from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		fight_commentfe = db.requestString("select fightcomment from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		fight_lengthfe = db.requestString("select fightlength from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
+            		
+            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
+            		
+            		if(wfe.length > 0){
+            			
+            			resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
+            			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
+            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
+            			resultBox.append("" + fight_commentfe[ife]);
+            			
+            			
+            		}
+            	}
+            }
+        });
+		
+		previous.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event2) {
+            	
+            	if(type.getSelectedItem() == "PLAYERS"){
+            		
+            		if(ife > 0){
+            			
+            			ife --;
+            			
+            			resultBox.setText("");
+            			
+            			resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
+            			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
+            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
+            			resultBox.append("" + fight_commentfe[ife]);
+            			res.revalidate();
+            			
+            		}
+            	}
+            }
+        });
+		
+		next.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event2) {
+            	
+            	if(type.getSelectedItem() == "PLAYERS"){
+            		
+            		if(ife < wfe.length - 1){
+            			
+            			ife ++;
+            			
+            			resultBox.setText("");
+            			
+            			resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
+            			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
+            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
+            			resultBox.append("" + fight_commentfe[ife]);
+            			res.revalidate();
+            			
+            		}
+            	}
+            }
+        });
 		
 		fightExplorer.setVisible(true);
 		
