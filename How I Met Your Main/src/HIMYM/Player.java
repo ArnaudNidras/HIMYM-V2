@@ -14,9 +14,11 @@ public class Player {
 	private int skill; // à rentrer à la main sur l'addon
 	private boolean backped;
 	private String skill_comment;
+	private int level;
+	private Race race;
 
 	public Player(String name, Guild guild, Faction faction, Classe classe, Specialization specialization, /*int hpLeft,*/
-			String comment, int skill, boolean backped) {
+			String comment, int skill, boolean backped, int level, Race race) {
 
 		this.name = name;
 		this.guild = guild;
@@ -30,6 +32,8 @@ public class Player {
 		this.skill = skill;
 		this.backped = backped;
 		this.skill_comment = comment;
+		this.level = level;
+		this.race = race;
 
 	}
 
@@ -150,6 +154,24 @@ public class Player {
 	public String getSkill_comment(){
 		
 		return skill_comment;
+		
+	}
+	
+	public Race getRace(){
+		
+		return race;
+		
+	}
+	
+	public int getLevel(){
+		
+		return level;
+		
+	}
+	
+	public void setLevel(int level){
+		
+		this.level = level;
 		
 	}
 

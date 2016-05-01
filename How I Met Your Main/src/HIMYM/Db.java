@@ -132,7 +132,7 @@ public class Db {
 		
 	}
 	
-	public void checkAddPlayer(String name, String guild, String faction, String classe, String specialization, String comment, int skill, int backped, int nbgotkilled, int nbkilled, String whisprage){
+	public void checkAddPlayer(String name, String guild, String faction, String classe, String specialization, String comment, int skill, int backped, int nbgotkilled, int nbkilled, String whisprage, int level, String race){
 		
 		boolean bp;
     	if(backped == 0) bp = false;
@@ -141,16 +141,16 @@ public class Db {
 		if(requestString("select name from players where name = '" + name + "'") != ""){
 			
 			if(objectLists.findPlayer(name) != null) return;
-			else objectLists.addPlayer(name, guild, faction, classe, specialization, comment, skill, bp);
+			else objectLists.addPlayer(name, guild, faction, classe, specialization, comment, skill, bp, level, race);
 			
 		}
 		
 		else{
 			//System.out.println("INSERT INTO PLAYERS VALUES ('" + name + "','" + guild + "','" + faction + "','"  + classe + "','" + specialization + "'," + nbgotkilled + "," + nbkilled + ",'" + whisprage + "'," + skill + "," + backped + ",'" + comment + "')");
-			String temp = requestString("INSERT INTO PLAYERS VALUES ('" + name + "','" + guild + "','" + faction + "','"  + classe + "','" + specialization + "'," + nbgotkilled + "," + nbkilled + ",'" + whisprage + "'," + skill + "," + backped + ",'" + comment + "')");
+			String temp = requestString("INSERT INTO PLAYERS VALUES ('" + name + "','" + guild + "','" + faction + "','"  + classe + "','" + specialization + "'," + nbgotkilled + "," + nbkilled + ",'" + whisprage + "'," + skill + "," + backped + ",'" + comment + "','" + race + "'," + level + ")");
 			//System.out.println("After");
 			if(objectLists.findPlayer(name) != null) return;
-			else objectLists.addPlayer(name, guild, faction, classe, specialization, comment, skill, bp);
+			else objectLists.addPlayer(name, guild, faction, classe, specialization, comment, skill, bp, level, race);
 			
 		}
 		
@@ -174,6 +174,8 @@ public class Db {
 				//int hpleft = Integer.valueOf(requestString("select hpleft from players where name = '" + name + "'"));
 				String comment = requestString("select skillcomment from players where name = '" + name + "'");
 				int skill = Integer.valueOf(requestString("select skill from players where name = '" + name + "'"));
+				int level = Integer.valueOf(requestString("select lvl from players where name = '" + name + "'"));
+				String race = requestString("select race from players where name = '" + name + "'");
 				int backped1 = Integer.valueOf(requestString("select backped from players where name = '" + name + "'"));
 				boolean backped;
 				if(backped1 == 1) backped = true;
@@ -185,7 +187,7 @@ public class Db {
 				checkAddGuild(guild, nbgk, nbk);
 				
 				//System.out.println("AddPlayerDB : " + name + " " + guild + " " + faction + " " + classe + " " + specialization/* + " " + hpleft*/ + " " + comment + " " + skill + " " + backped);
-				objectLists.addPlayer(name, guild, faction, classe, specialization/*, hpleft*/, comment, skill, backped);
+				objectLists.addPlayer(name, guild, faction, classe, specialization/*, hpleft*/, comment, skill, backped, level, race);
 				
 			}
 			

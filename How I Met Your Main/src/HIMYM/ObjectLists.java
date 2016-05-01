@@ -109,9 +109,13 @@ public class ObjectLists {
 		export.append(';');
 		export.append("Faction");
 		export.append(';');
+		export.append("Race");
+		export.append(';');
 		export.append("Classe");
 		export.append(';');
 		export.append("Specialization");
+		export.append(';');
+		export.append("Level");
 		export.append(';');
 		export.append("Skill Comment");
 		export.append(';');
@@ -132,9 +136,13 @@ public class ObjectLists {
 			export.append(';');
 			export.append(players.get(i).getFaction().getName());
 			export.append(';');
+			export.append(players.get(i).getRace().getName());
+			export.append(';');
 			export.append(players.get(i).getClasse().getName());
 			export.append(';');
 			export.append(players.get(i).getSpecialization().getName());
+			export.append(';');
+			export.append(Integer.toString(players.get(i).getLevel()));
 			export.append(';');
 			export.append(players.get(i).getSkill_comment());
 			export.append(';');
@@ -360,6 +368,11 @@ public class ObjectLists {
 		String comment;
 		int skill;
 		boolean backped;
+		int level;
+		Race race;
+		int nbgk;
+		int nbk;
+		String raceName;
 		
 		for(int i = 1 ; i < name.length + 1 ; i ++){
 			
@@ -367,10 +380,23 @@ public class ObjectLists {
 			names = db.requestString("SELECT NAME from (select p.NAME, rownum r from PLAYERS p) where r = " + i);
 			
 			guildName = db.requestString("SELECT PLAYERS.GUILD FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
-			int nbgk = Integer.valueOf(db.requestString("SELECT NBGOTKILLED FROM GUILDS WHERE NAME = '" + guildName + "'"));
-			int nbk = Integer.valueOf(db.requestString("SELECT  NBKILLED FROM GUILDS WHERE NAME = '" + guildName + "'"));
-			if(findGuild(guildName) == null) guilds.add(new Guild(guildName, nbgk, nbk));
-			guild = findGuild(guildName);
+			//System.out.println(guildName.isEmpty());
+			
+			//if(guildName.matches("null") == false && guildName != null){
+			
+				nbgk = Integer.valueOf(db.requestString("SELECT NBGOTKILLED FROM GUILDS WHERE NAME = '" + guildName + "'"));
+				nbk = Integer.valueOf(db.requestString("SELECT  NBKILLED FROM GUILDS WHERE NAME = '" + guildName + "'"));
+				if(findGuild(guildName) == null) guilds.add(new Guild(guildName, nbgk, nbk));
+				guild = findGuild(guildName);
+			
+			/*}
+			else{
+				
+				nbgk = nbk = 0;
+				guild = null;
+				
+			}*/
+			
 			
 			factionName = db.requestString("SELECT PLAYERS.FACTION FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
 			faction = findFaction(factionName);
@@ -389,8 +415,15 @@ public class ObjectLists {
 			
 			backped = Boolean.valueOf(db.requestString("SELECT PLAYERS.BACKPED FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
 			
-			players.add(new Player(names, guild, faction, classe, specialization, /*hpLeft,*/ comment, skill, backped));
-			System.out.println("New player Added : Name : " + names + " Guilde : " + guild.getName() + " Faction : " + faction.getName() + " Class : " + classe.getName() + " Specialization : " + specialization.getName() + /*" hpLeft : " + hpLeft +*/ " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
+			level = Integer.valueOf(db.requestString("SELECT PLAYERS.LVL FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'"));
+			
+			//race = Race.valueOf(db.requestString("SELECT PLAYERS.RACE FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'").toUpperCase());
+			raceName = db.requestString("SELECT PLAYERS.RACE FROM PLAYERS WHERE PLAYERS.NAME = '" + name[i-1] + "'");
+			race = Race.valueOf(raceName.toUpperCase());
+			//System.out.println(race);
+			players.add(new Player(names, guild, faction, classe, specialization, /*hpLeft,*/ comment, skill, backped, level, race));
+			if(guild != null) System.out.println("New player Added : Name : " + names + " Guilde : " + guild.getName() + " Faction : " + faction.getName() + " Class : " + classe.getName() + " Specialization : " + specialization.getName() + /*" hpLeft : " + hpLeft +*/ " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
+			else System.out.println("New player Added : Name : " + names + " Guilde : NO GUILD  Faction : " + faction.getName() + " Class : " + classe.getName() + " Specialization : " + specialization.getName() + /*" hpLeft : " + hpLeft +*/ " Comment : " + comment + " Skill : " + skill + "/10 Backpedal :  " + backped);
 			
 		}
 
@@ -411,9 +444,9 @@ public class ObjectLists {
 	}
 
 	public void addPlayer(String name, String guild, String faction, String classe, String specialization, /*int hpLeft,*/
-			String comment, int skill, boolean backped){
+			String comment, int skill, boolean backped, int level, String race){
 		
-		players.add(new Player(name, findGuild(guild), findFaction(faction), Classe.valueOf(classe.toUpperCase()), Specialization.valueOf(specialization.toUpperCase())/*, hpLeft*/, comment, skill, backped));
+		players.add(new Player(name, findGuild(guild), findFaction(faction), Classe.valueOf(classe.toUpperCase()), Specialization.valueOf(specialization.toUpperCase())/*, hpLeft*/, comment, skill, backped, level, Race.valueOf(race.toUpperCase())));
 				
 	}
 	
