@@ -8,79 +8,64 @@ import java.sql.Statement;
 
 public class Db {
 
-	Connection con;
-	String username;
-	String password;
-	ObjectLists objectLists;
+	private Connection con;
+	private String address;
+	private String port;
+	private String username;
+	private String password;
 	
-	public Db() throws ClassNotFoundException{
+	private GUI gui;
+	
+	public Db(String address, String port, String username, String password, GUI gui) throws ClassNotFoundException{
 		
-		this.objectLists = new ObjectLists(this);
+		this.gui = gui;
 		
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
 			
-			this.username = "";
-			this.password = ""; 
+			this.address = address;
+			this.port = port;
+			this.username = username;
+			this.password = password;
+			DriverManager.setLoginTimeout(2000);
+			this.con = DriverManager.getConnection("jdbc:oracle:thin:@" + this.address + ":" + this.port + ":xe", this.username, this.password);
 			
-			this.con = DriverManager.getConnection("jdbc:oracle:thin::1521:xe",username,password);
-			//this.con = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:5000:xe",username,password);		
+			this.gui.closeStartFrame();
+			this.gui.start();	
 			
 		}
 		
 		catch ( SQLException err ) {
 		
 			System.out.println( err.getMessage( ) );
+			this.gui.connectionError();
 			
 		}
-		
+
 	}
 	
-	public void connect() throws ClassNotFoundException{
+	public void connect(String address, String port, String username, String password) throws ClassNotFoundException{
 		
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			DriverManager.registerDriver (new oracle.jdbc.OracleDriver());
+			DriverManager.setLoginTimeout(2000);
 			
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@127.0.0.1:1521:xe",username,password);
-			con = DriverManager.getConnection("jdbc:oracle:thin::1521:xe",username,password);
+			con = DriverManager.getConnection("jdbc:oracle:thin:@" + address + ":" + port + ":xe", username, password);
+			
+			this.gui.closeStartFrame();
+			this.gui.start();
 			
 		}
 		
 		catch ( SQLException err ) {
 			
 			System.out.println( err.getMessage( ) );
+			this.gui.connectionError();
 			
 		}
 	
-	}
-	
-	public void get_guild_nbgotkilled_from_player(){
-		
-		try{
-			
-			//con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe",hr,hr);
-			Statement stmt = con.createStatement();
-			//ResultSet add = stmt.executeQuery("INSERT INTO PLAYER VALUES('Nidras', 'Alliance', 'Paladin', 'Retribution', 0, 0, 100, null, 10, 0, null, 'Le Petit Menhir')");
-			ResultSet rs = stmt.executeQuery("SELECT UNIQUE GUILDS.NBGOTKILLED FROM GUILDS INNER JOIN PLAYERS ON PLAYERS.GUILD = GUILDS.NAME WHERE PLAYERS.GUILD = 'Le Petit Menhir'");
-			
-			int i = 0;
-			while(rs.next()) {
-				 
-				  String lastName = rs.getString(1);
-				  i ++;
-				  
-			}
-			
-		}
-		
-		catch(SQLException err){
-		
-			System.out.println(err.getMessage());
-		
-		}
-		
 	}
 
 	public String requestString(String request){
@@ -113,152 +98,252 @@ public class Db {
 		
 	}
 	
-	public void checkAddGuild(String name, int nbgotkilled, int nbkilled){
+	public String getPlayerIDFromName(String name){
 		
-		if(requestString("select name from guilds where name = '" + name + "'") != ""){
-			
-			if(objectLists.findGuild(name) != null) return;
-			else objectLists.addGuild(name, nbgotkilled, nbkilled);
-			
-		}
+		return requestString("select player_id from players where name ='" + name + "'");
 		
-		else{
+	}
+	
+	public String getPlayerNameFromID(String id){
+		
+		return requestString("select name from players where player_id =" + id);
+		
+	}
+	
+	public String getGuildIDFromName(String name){
+		
+		return requestString("select guild_id from guilds where name ='" + name + "'");
+		
+	}
+	
+	public String getGuildNameFromID(String id){
+		
+		return requestString("select name from guilds where guild_id =" + id);
+		
+	}
+	
+	public String getPlaceIDFromName(String name){
+		
+		return requestString("select place_id from places where name ='" + name + "'");
+		
+	}
+	
+	public String getPlaceNameFromID(String id){
+		
+		return requestString("select name from places where place_id =" + id);
+		
+	}
+	
+	public String getPlaceXFromID(String id){
+		
+		return requestString("select x from places where place_id =" + id);
+		
+	}
+	
+	public String getPlaceYFromID(String id){
+		
+		return requestString("select y from places where place_id =" + id);
+		
+	}
+	
+	public String getPlaceRegionFromID(String id){
+		
+		return requestString("select region from places where place_id =" + id);
+		
+	}
+	
+	public String getContinentFromPlaceID(String id){
+		
+		return requestString("select r.continent from places p, regions r where p.region = r.name and p.place_id =" + id);
+		
+	}
+	
+	public String getFightHpleftaFromID(String id){
+		
+		return requestString("select hplefta from fights where fight_id =" + id);
+		
+	}
+	
+	public String getFightHpleftbFromID(String id){
+		
+		return requestString("select hpleftb from fights where fight_id =" + id);
+		
+	}
+	
+	public String getNameFromPlayerA(String id){
+		
+		return requestString("select p.name from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getNameFromPlayerB(String id){
+		
+		return requestString("select p.name from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getGuildNameFromPlayerA(String id){
+		
+		return getGuildNameFromID(requestString("select p.guild from players p, fights f where p.player_id = f.playera and f.fight_id =" + id));
+		
+	}
+	
+	public String getGuildNameFromPlayerB(String id){
+		
+		return getGuildNameFromID(requestString("select p.guild from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id));
+		
+	}
+	
+	public String getServerFromPlayerA(String id){
+		
+		return requestString("select p.server from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getServerFromPlayerB(String id){
+		
+		return requestString("select p.server from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getRaceFromPlayerA(String id){
+		
+		return requestString("select p.race from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getRaceFromPlayerB(String id){
+		
+		return requestString("select p.race from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getFactionFromPlayerA(String id){
+		
+		return requestString("select p.faction from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getFactionFromPlayerB(String id){
+		
+		return requestString("select p.faction from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getClassFromPlayerA(String id){
+		
+		return requestString("select p.classe from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getClassFromPlayerB(String id){
+		
+		return requestString("select p.classe from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getSpecializationFromPlayerA(String id){
+		
+		return requestString("select p.specialization from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getSpecializationFromPlayerB(String id){
+		
+		return requestString("select p.specialization from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getLevelFromPlayerA(String id){
+		
+		return requestString("select p.lvl from players p, fights f where p.player_id = f.playera and f.fight_id =" + id);
+		
+	}
+	
+	public String getLevelFromPlayerB(String id){
+		
+		return requestString("select p.lvl from players p, fights f where p.player_id = f.playerb and f.fight_id =" + id);
+		
+	}
+	
+	public String getTimeFromFight(String id){
+		
+		return requestString("select to_char(time, 'YYYY-MM-DD HH24:MI:SS') from fights where fight_id =" + id);
+		
+	}
+	
+	public String getLengthFromFight(String id){
+		
+		return requestString("select fightlength from fights where fight_id =" + id);
+		
+	}
+	
+	public String getCommentFromFight(String id){
+		
+		String temp = requestString("select fightcomment from fights where fight_id =" + id);
+		
+		if(temp.matches("null")) return "";
+		
+		else return temp;
+		
+	}
+	
+	//lvla, lvlb, servera, serverb, racea, raceb, classea, classeb, speca, specb
+	
+	public void addPlayer(String name, String level, String guild, String server, String faction, String race, String classe, String specialization, String nbkills, String nbdeaths, String whisprage, String skill, String backped, String skillcomment){
+		
+		if(requestString("select name from players where name ='" + name + "'") == ""){
 			
-			String temp = requestString("INSERT INTO GUILDS VALUES ('" + name + "', " + nbgotkilled + ", " + nbkilled + ")");
-			if(objectLists.findGuild(name) != null) return;
-			else objectLists.addGuild(name, nbgotkilled, nbkilled);
+			int id = Integer.valueOf(requestString("select MAX(player_id) from players")) + 1;
+			
+			requestString("insert into players (player_id, name, lvl, guild, server, faction, race, classe, specialization, nbkills, nbdeaths, skill, skillcomment, backped, whisprage) values (" + id + ",'" + name + "'," + level.toString() + "," + Integer.valueOf(getGuildIDFromName(guild)) + ",'" + server + "','" + faction + "','" + race + "','" + classe + "','" + specialization + "'," + Integer.valueOf(nbkills) + "," + Integer.valueOf(nbdeaths) + "," + skill + ",'" + skillcomment + "'," + backped + ",'" + whisprage + "')");
 			
 		}
 		
 	}
 	
-	public void checkAddPlayer(String name, String guild, String faction, String classe, String specialization, String comment, int skill, int backped, int nbgotkilled, int nbkilled, String whisprage, int level, String race){
+	public void addGuild(String name){
 		
-		boolean bp;
-    	if(backped == 0) bp = false;
-    	else bp = true;
-		
-		if(requestString("select name from players where name = '" + name + "'") != ""){
+		if(requestString("select name from guilds where name ='" + name + "'") == ""){
 			
-			if(objectLists.findPlayer(name) != null) return;
-			else objectLists.addPlayer(name, guild, faction, classe, specialization, comment, skill, bp, level, race);
+			int id = Integer.valueOf(requestString("select MAX(guild_id) from guilds")) + 1;
 			
-		}
-		
-		else{
-			//System.out.println("INSERT INTO PLAYERS VALUES ('" + name + "','" + guild + "','" + faction + "','"  + classe + "','" + specialization + "'," + nbgotkilled + "," + nbkilled + ",'" + whisprage + "'," + skill + "," + backped + ",'" + comment + "')");
-			String temp = requestString("INSERT INTO PLAYERS VALUES ('" + name + "','" + guild + "','" + faction + "','"  + classe + "','" + specialization + "'," + nbgotkilled + "," + nbkilled + ",'" + whisprage + "'," + skill + "," + backped + ",'" + comment + "','" + race + "'," + level + ")");
-			//System.out.println("After");
-			if(objectLists.findPlayer(name) != null) return;
-			else objectLists.addPlayer(name, guild, faction, classe, specialization, comment, skill, bp, level, race);
+			requestString("insert into guilds (guild_id, name) values (" + id + ",'" + name + "')");
 			
 		}
 		
 	}
 	
-	public void checkPlayerDB(String name){
+	public void addRegion(String name, String continent){
 		
-		//System.out.println("test1");
-		
-		if(requestString("select name from players where name = '" + name + "'") != ""){
+		if(requestString("select name from regions where name ='" + name + "' and continent ='" + continent + "'") == ""){
 			
-			//System.out.println("test2");
-			
-			if(objectLists.findPlayer(name) != null) return;
-			else{
-			
-				String guild = requestString("select guild from players where name = '" + name + "'");
-				String faction = requestString("select faction from players where name = '" + name + "'");
-				String classe = requestString("select classe from players where name = '" + name + "'");
-				String specialization = requestString("select specialization from players where name = '" + name + "'");
-				//int hpleft = Integer.valueOf(requestString("select hpleft from players where name = '" + name + "'"));
-				String comment = requestString("select skillcomment from players where name = '" + name + "'");
-				int skill = Integer.valueOf(requestString("select skill from players where name = '" + name + "'"));
-				int level = Integer.valueOf(requestString("select lvl from players where name = '" + name + "'"));
-				String race = requestString("select race from players where name = '" + name + "'");
-				int backped1 = Integer.valueOf(requestString("select backped from players where name = '" + name + "'"));
-				boolean backped;
-				if(backped1 == 1) backped = true;
-				else backped = false;
-				
-				
-				int nbgk = Integer.valueOf(requestString("select nbgotkilled from guilds where name = '" + guild + "'"));
-				int nbk = Integer.valueOf(requestString("select nbkilled from guilds where name = '" + guild + "'"));
-				checkAddGuild(guild, nbgk, nbk);
-				
-				//System.out.println("AddPlayerDB : " + name + " " + guild + " " + faction + " " + classe + " " + specialization/* + " " + hpleft*/ + " " + comment + " " + skill + " " + backped);
-				objectLists.addPlayer(name, guild, faction, classe, specialization/*, hpleft*/, comment, skill, backped, level, race);
-				
-			}
+			requestString("insert into regions (name, continent) values ('" + name + "','" + continent + "')");
 			
 		}
 		
 	}
 	
-	public void checkAddPlace(String name, int x, int y){
+	public void addPlace(int id, String name, String region, String continent, String x, String y){
 		
-		if(requestString("select name from places where name = '" + name + "' and x = " + x + " and y = " + y) != ""){
-			
-			if(objectLists.findPlace(name, x, y) != null) return;
-			else objectLists.addPlace(name, x, y);
-			
-		}
-		
-		else{
-			
-			String temp = requestString("INSERT INTO PLACES VALUES ('" + name + "', " + x + ", " + y + ")");
-			if(objectLists.findPlace(name, x, y) != null) return;
-			else objectLists.addPlace(name, x , y);
-			
-		}
+			requestString("insert into places (place_id, name, region, x, y) values (" + id + ",'" + name + "','" + region + "'," + x + "," + y + ")");
 		
 	}
 	
-	public void checkAddTime(int year, int month, int day, int hour, int minute, int second){
+	public void addFight(String a, String b, String hplefta, String hpleftb, String winner, String loser, String time, String fightcomment, String fightlength, String continent, String region, String placename, String x, String y){
 		
-		String timer = "" + year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
-		
-		String[] longtime = timer.split("-|\\:|\\ ");
-		for(int i = 0 ; i < 6 ; i ++){
+		if(requestString("select fight_id from fights where playera = " + getPlayerIDFromName(a) + " and playerb = " + getPlayerIDFromName(b) + " and to_char(time, 'YYYY-MM-DD HH24:MI:SS') = '" + time + "'").matches("")){
 			
-			if(longtime[i].length() == 1) longtime[i] = "0" + longtime[i];
+			int id = Integer.valueOf(requestString("select MAX(fight_id) from fights")) + 1;
 			
-		}
-		timer = longtime[0] + "-" + longtime[1] + "-" + longtime[2] + " " + longtime[3] + ":" + longtime[4] + ":" + longtime[5];
-		
-		if(requestString("select TO_CHAR(time ,'YYYY-MM-DD HH24:MI:SS') from times where time = TO_DATE('" + timer + "', 'YYYY-MM-DD HH24:MI:SS')").matches(timer)){
+			addRegion(region, continent);
 			
-			System.out.println("true");
-			if(objectLists.findTime(timer) != null) return;
-			else objectLists.addTime(year, month, day, hour, minute, second, timer);
+			addPlace(id, placename, region, continent, x, y);
 			
-		}
-		
-		else{
+			requestString("insert into fights (fight_id, playera, playerb, hplefta, hpleftb, winner, loser, time, fightcomment, fightlength) values (" + id + "," + getPlayerIDFromName(a) + "," + getPlayerIDFromName(b) + "," + hplefta + "," + hpleftb + "," + getPlayerIDFromName(winner) + "," + getPlayerIDFromName(loser) + ", to_date('" + time + "', 'YYYY-MM-DD HH24:MI:SS'),'" + fightcomment + "','" + fightlength + "')");
 			
-			String temp = requestString("INSERT INTO TIMES VALUES (TO_DATE('" + timer + "', 'YYYY-MM-DD HH24:MI:SS'))");
-			if(objectLists.findTime(timer) != null) return;
-			else objectLists.addTime(year, month, day, hour, minute, second, timer);
-			
-		}
-		
-	}
-	
-	public void checkAddFight(String a, String b, String winner, String loser, String time, String place, int x, int y, String fight_comment, int fight_length, int hplefta, int hpleftb){
-		
-		if(requestString("select winner from fights where playera = '" + a + "' and playerb = '" + b + "' and x = " + x + " and y = " + y + " and place = '" + place + "' and time = '" + time + "' and loser = '" + loser + "' and hplefta = '" + hplefta + "' and hpleftb = '" + hpleftb + "'") == winner){
-			
-			if(objectLists.findFight(a, b, winner, loser, place, x, y, time, hplefta, hpleftb) != null) return;
-			else objectLists.addFight(a, b, winner, loser, place, x, y, time, fight_comment, fight_length, hplefta, hpleftb);
-			
-		}
-		
-		else{
-			
-			//System.out.println("INSERT INTO FIGHTS VALUES ('" + a + "', '" + b + "', '" + winner + "', '" + loser + "', TO_DATE('" + time + "', 'YYYY-MM-DD HH24:MI:SS'), '" + place + "', '" + fight_comment + "', " + fight_length + ", " + x + ", " + y);
-			String temp = requestString("INSERT INTO FIGHTS VALUES ('" + a + "', '" + b + "', '" + winner + "', '" + loser + "', TO_DATE('" + time + "', 'YYYY-MM-DD HH24:MI:SS'), '" + place + "', '" + fight_comment + "', " + fight_length + ", " + x + ", " + y + ", " + hplefta + ", " + hpleftb + ")");
-			if(objectLists.findFight(a, b, winner, loser, place, x, y, time, hplefta, hpleftb) != null) return;
-			else objectLists.addFight(a, b, winner, loser, place, x, y, time, fight_comment, fight_length, hplefta, hpleftb);
+			requestString("update players set nbkills = nbkills + 1 where player_id = " + winner);
+			requestString("update players set nbdeaths = nbdeaths + 1 where player_id = " + loser);
 			
 		}
 		

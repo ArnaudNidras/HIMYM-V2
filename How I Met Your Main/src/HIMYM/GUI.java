@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -21,6 +22,13 @@ import javax.swing.JTextField;
 
 public class GUI extends JFrame implements ActionListener{
 
+	private JFrame startFrame;
+	private JTextArea address;
+	private JTextArea port;
+	private JTextArea username;
+	private JTextArea password;
+	private JButton connect;
+	
 	private Db db;
 	private JFrame mainFrame;
 	private JTextArea inputRequest;
@@ -36,30 +44,85 @@ public class GUI extends JFrame implements ActionListener{
 	private JScrollPane scrollOutput;
 	
 	private JFrame addWindow;
-	private String[] tables = { "Player", "Guild", "Place", "Time", "Fight" };
+	private String[] tables = { "Player", "Guild", "Fight" };
 	private JComboBox list;
 	private JPanel cb;
 	private JButton download;
 	
 	private JButton addPlayer;
 	private JButton addGuild;
-	private JButton addPlace;
-	private JButton addTime;
 	private JButton addFight;
 	
 	private JPanel playerPanel;
 	private JPanel guildPanel;
-	private JPanel placePanel;
-	private JPanel timePanel;
 	private JPanel fightPanel;
 	
 	private JFrame fightExplorer;
-	private String[] afe, bfe, wfe, lfe, hpLeftAfe, hpLeftBfe, placefe, xfe, yfe, timefe, fight_commentfe, fight_lengthfe;
+	private String[] fightid;
 	int ife;
 	
-	public GUI(Db db){
+	public GUI(){
 		
-		this.db = db;
+		
+		this.startFrame = new JFrame("How I Met Your Main");
+		this.startFrame.setSize(430, 240);
+		this.startFrame.setResizable(true);
+		this.startFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.startFrame.setLayout(new GridLayout(5,1));
+		
+		this.address = new JTextArea("Server's address");
+		this.address.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.port = new JTextArea("Port");
+		this.port.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.username = new JTextArea("Username");
+		this.username.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.password = new JTextArea("Password");
+		this.password.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		
+		this.connect = new JButton("Connect");
+		this.connect.setName("ConnectButton");
+		this.connect.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event2) {
+            	
+            	connect();
+
+            }
+        });
+		
+		this.startFrame.getContentPane().add(address);
+		this.startFrame.getContentPane().add(port);
+		this.startFrame.getContentPane().add(username);
+		this.startFrame.getContentPane().add(password);
+		this.startFrame.getContentPane().add(connect);
+		
+		this.startFrame.setVisible(true);
+		
+	}
+	
+	public void connectionError(){
+		
+		startFrame.setTitle("How I Met Your Main - CONNECTION FAILED");
+		
+	}
+	
+	public void closeStartFrame(){
+		
+		startFrame.setVisible(false);
+		
+	}
+	
+	public void connect(){
+		
+		try {
+			this.db = new Db(address.getText(), port.getText(), username.getText(), password.getText(), this);
+		} catch (ClassNotFoundException e) {
+			
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public void start(){
 		
 		this.mainFrame = new JFrame("How I Met Your Main");
 		this.mainFrame.setSize(860, 480);
@@ -68,29 +131,38 @@ public class GUI extends JFrame implements ActionListener{
 		
 		this.inputRequest = new JTextArea("Input");
 		this.inputRequest.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+		
 		this.outputRequest = new JTextArea("Output");
 		this.outputRequest.setEditable(false);
 		this.outputRequest.setBorder(BorderFactory.createLineBorder(Color.RED));
+		
 		this.sendRequest = new JButton("Send SQL request !");
 		this.sendRequest.setName("sendRequest");
 		this.sendRequest.addActionListener((ActionListener) this);
+		
 		this.addWindowButton = new JButton("Add in database");
 		this.addWindowButton.setName("addWindowButton");
 		this.addWindowButton.addActionListener((ActionListener) this);
+		
 		this.input = new JLabel("Enter SQL Request (without ';')");
 		this.output = new JLabel("Result of the SQL Request");
+		
 		this.download = new JButton("Download Database");
 		this.download.setName("downloadDatabase");
 		this.download.addActionListener((ActionListener) this);
+		
 		this.exportToTxt = new JButton("Export DB to .txt");
 		this.exportToTxt.setName("exportToTxt");
 		this.exportToTxt.addActionListener((ActionListener) this);
+		
 		this.fightExplorerWindow = new JButton("Fights Explorer");
 		this.fightExplorerWindow.setName("fightExplorerWindow");
 		this.fightExplorerWindow.addActionListener((ActionListener) this);
+		
 		this.statsWindow = new JButton("Statistics");
 		this.statsWindow.setName("statsWindow");
 		this.statsWindow.addActionListener((ActionListener) this);
+		
 		
 		
 		this.mainFrame.setLayout(new GridLayout(5,2));
@@ -113,14 +185,10 @@ public class GUI extends JFrame implements ActionListener{
 		
 		this.playerPanel = new JPanel(new FlowLayout());
 		this.guildPanel = new JPanel(new FlowLayout());
-		this.placePanel = new JPanel(new FlowLayout());
-		this.timePanel = new JPanel(new FlowLayout());
 		this.fightPanel = new JPanel(new FlowLayout());
 		
 		this.addPlayer = new JButton("Add Player !");
 		this.addGuild = new JButton("Add Guild !");
-		this.addPlace = new JButton("Add Place !");
-		this.addTime = new JButton("Add Time !");
 		this.addFight = new JButton("Add Fight !");
 		
 		this.ife = 0;
@@ -148,13 +216,13 @@ public class GUI extends JFrame implements ActionListener{
 	public void toggleFightExplorer(){
 		
 		fightExplorer = new JFrame("Fight Explorer");
-		fightExplorer.setSize(820, 240);
+		fightExplorer.setSize(1000, 480);
 		fightExplorer.setResizable(true);
 		fightExplorer.setLayout(new BorderLayout());
 		JPanel res = new JPanel(new BorderLayout());
 		JTextArea resultBox = new JTextArea("");
-		JTextField toSearch = new JTextField("Enter a name (guild, player, class, specialization, place, faction, race) or a date AAAA-MO-DD and set the type above.");
-		String[] types = { "PLAYERS", "GUILDS", "PLACES", "TIMES", "CLASSES", "SPECIALIZATIONS", "FACTIONS", "RACES" };
+		JTextField toSearch = new JTextField("Enter a name (guild, player, class, specialization, place, region, continent, faction, race, server) or a date YYYY-MM-DD and set the type above.");
+		String[] types = { "PLAYERS", "GUILDS", "PLACES", "TIMES", "CLASSES", "SPECIALIZATIONS", "FACTIONS", "RACES", "REGIONS", "CONTINENTS", "SERVERS" };
 		JComboBox type = new JComboBox(types);
 		JButton previous = new JButton("Previous");
 		JButton next = new JButton("Next");
@@ -178,186 +246,93 @@ public class GUI extends JFrame implements ActionListener{
             	
             	if(type.getSelectedItem() == "PLAYERS"){
             		
-            		resultBox.setText("");
             		ife = 0;
+            		String id = db.getPlayerIDFromName(toSearch.getText());
+            		if(id.matches("") == false) fightid = db.requestString("select fight_id from fights where playera = " + id + " or playerb = " + id).split("\n");
+            		resultFE(ife, resultBox);
             		
-            		wfe = db.requestString("select winner from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		lfe = db.requestString("select loser from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		hpLeftAfe = db.requestString("select hplefta from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		hpLeftBfe = db.requestString("select hpleftb from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		placefe = db.requestString("select place from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		xfe = db.requestString("select x from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		yfe = db.requestString("select y from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		timefe = db.requestString("select time from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		fight_commentfe = db.requestString("select fightcomment from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		fight_lengthfe = db.requestString("select fightlength from fights where playera = '" + toSearch.getText() + "' or playerb = '"  + toSearch.getText() + "'").split("\n");
-            		
-            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
-            		
-            		if(wfe.length > 0 && hpLeftAfe[ife].length() != 0){
-            			
-            			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-            			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-            			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-            			resultBox.append("" + fight_commentfe[ife]);
-            			
-            			
-            		}
             	}
             	
             	if(type.getSelectedItem() == "GUILDS"){
             		
-            		resultBox.setText("");
             		ife = 0;
+            		String id = db.getGuildIDFromName(toSearch.getText());
+            		if(id.matches("") == false) fightid = db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.guild =" + id).split("\n");
+            		resultFE(ife, resultBox);
             		
-            		wfe = db.requestString("select f.winner from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		lfe = db.requestString("select f.loser from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftAfe = db.requestString("select f.hplefta from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftBfe = db.requestString("select f.hpleftb from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		placefe = db.requestString("select f.place from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		xfe = db.requestString("select f.x from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		yfe = db.requestString("select f.y from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		timefe = db.requestString("select f.time from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		fight_commentfe = db.requestString("select f.fightcomment from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
-            		fight_lengthfe = db.requestString("select f.fightlength from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.guild = '" + toSearch.getText() + "'").split("\n");
+            	}
+            	
+            	if(type.getSelectedItem() == "PLACES"){
             		
-            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
+            		ife = 0;
+            		fightid = db.requestString("select place_id from places where name = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select place_id from places where name = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
             		
-            		if(wfe.length > 0 && hpLeftAfe[ife].length() != 0){
-            			
-            			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-            			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-             			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-            			resultBox.append("" + fight_commentfe[ife]);
-            			
-            			
-            		}
+            	}
+            	
+            	if(type.getSelectedItem() == "TIMES"){
+            		
+            		ife = 0;
+            		fightid = db.requestString("select fight_id from fights where to_char(time, 'YYYY-MM-DD') = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select fight_id from fights where to_char(time, 'YYYY-MM-DD') = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
+            		
             	}
             	
             	if(type.getSelectedItem() == "CLASSES"){
             		
-            		resultBox.setText("");
             		ife = 0;
+            		fightid = db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.classe = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.classe = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
             		
-            		wfe = db.requestString("select f.winner from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		lfe = db.requestString("select f.loser from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftAfe = db.requestString("select f.hplefta from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftBfe = db.requestString("select f.hpleftb from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		placefe = db.requestString("select f.place from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		xfe = db.requestString("select f.x from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		yfe = db.requestString("select f.y from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		timefe = db.requestString("select f.time from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		fight_commentfe = db.requestString("select f.fightcomment from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		fight_lengthfe = db.requestString("select f.fightlength from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.classe = '" + toSearch.getText() + "'").split("\n");
-            		
-            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
-            		
-            		if(wfe.length > 0 && hpLeftAfe[ife].length() != 0){
-            			
-            			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-            			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-             			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-            			resultBox.append("" + fight_commentfe[ife]);
-            			
-            			
-            		}
-            	}
-            	
-            	if(type.getSelectedItem() == "FACTIONS"){
-            		
-            		resultBox.setText("");
-            		ife = 0;
-            		
-            		wfe = db.requestString("select f.winner from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		lfe = db.requestString("select f.loser from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftAfe = db.requestString("select f.hplefta from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftBfe = db.requestString("select f.hpleftb from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		placefe = db.requestString("select f.place from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		xfe = db.requestString("select f.x from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		yfe = db.requestString("select f.y from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		timefe = db.requestString("select f.time from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		fight_commentfe = db.requestString("select f.fightcomment from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		fight_lengthfe = db.requestString("select f.fightlength from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.faction = '" + toSearch.getText() + "'").split("\n");
-            		
-            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
-            		
-            		if(wfe.length > 0 && hpLeftAfe[ife].length() != 0){
-            			
-            			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-            			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-             			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-            			resultBox.append("" + fight_commentfe[ife]);
-            			
-            			
-            		}
             	}
             	
             	if(type.getSelectedItem() == "SPECIALIZATIONS"){
             		
-            		resultBox.setText("");
             		ife = 0;
+            		fightid = db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.specialization = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.specialization = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
             		
-            		wfe = db.requestString("select f.winner from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		lfe = db.requestString("select f.loser from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftAfe = db.requestString("select f.hplefta from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftBfe = db.requestString("select f.hpleftb from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		placefe = db.requestString("select f.place from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		xfe = db.requestString("select f.x from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		yfe = db.requestString("select f.y from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		timefe = db.requestString("select f.time from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		fight_commentfe = db.requestString("select f.fightcomment from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
-            		fight_lengthfe = db.requestString("select f.fightlength from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.specialization = '" + toSearch.getText() + "'").split("\n");
+            	}
+            	
+            	if(type.getSelectedItem() == "FACTIONS"){
             		
-            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
+            		ife = 0;
+            		fightid = db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.faction = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.faction = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
             		
-            		if(wfe.length > 0 && hpLeftAfe[ife].length() != 0){
-            			
-            			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-            			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-             			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-            			resultBox.append("" + fight_commentfe[ife]);
-            			
-            			
-            		}
             	}
             	
             	if(type.getSelectedItem() == "RACES"){
             		
-            		resultBox.setText("");
             		ife = 0;
+            		fightid = db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.race = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.race = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
             		
-            		wfe = db.requestString("select f.winner from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		lfe = db.requestString("select f.loser from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftAfe = db.requestString("select f.hplefta from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		hpLeftBfe = db.requestString("select f.hpleftb from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		placefe = db.requestString("select f.place from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		xfe = db.requestString("select f.x from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		yfe = db.requestString("select f.y from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		timefe = db.requestString("select f.time from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		fight_commentfe = db.requestString("select f.fightcomment from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		fight_lengthfe = db.requestString("select f.fightlength from fights f, players p where (f.playera = p.name or f.playerb = p.name) and p.race = '" + toSearch.getText() + "'").split("\n");
-            		
-            		//System.out.println(a + " " + b + " " + w + " " + l + " " + hpLeftA + " " + hpLeftB + " " + place + " " + x + " " + y + " " + time + " " + fight_comment + " " + fight_length);
-            		
-            		if(wfe.length > 0 && hpLeftAfe[ife].length() != 0){
-            			
-            			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-            			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-             			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-            			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-            			resultBox.append("" + fight_commentfe[ife]);
-            			
-            			
-            		}
             	}
             	
-            	//DATE AND PLACE
+            	if(type.getSelectedItem() == "REGIONS"){
+            		
+            		ife = 0;
+            		fightid = db.requestString("select place_id from places where region = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select place_id from places where region = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
+            		
+            	}
             	
+            	if(type.getSelectedItem() == "CONTINENTS"){
+            		
+            		ife = 0;
+            		fightid = db.requestString("select p.place_id from places p, regions r where p.region = r.name and r.continent = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select p.place_id from places p, regions r where p.region = r.name and r.continent = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
+            		
+            	}
+            	
+            	if(type.getSelectedItem() == "SERVERS"){
+            		
+            		ife = 0;
+            		fightid = db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.server = '" + toSearch.getText() + "'").split("\n");
+            		if(db.requestString("select distinct f.fight_id from players p, fights f where (f.playera = p.player_id or f.playerb = p.player_id) and p.server = '" + toSearch.getText() + "'").matches("") == false) resultFE(ife, resultBox);
+            		
+            	}
             }
         });
 		
@@ -365,40 +340,24 @@ public class GUI extends JFrame implements ActionListener{
             public void actionPerformed(ActionEvent event2) {
             	
             		
-           		if(ife > 0 && hpLeftAfe[ife].length() != 0){
+           		if(ife > 0){
            			
            			ife --;
+           			resultFE(ife, resultBox);
            			
-           			resultBox.setText("");
-           			
-        			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-        			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-           			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-           			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-           			resultBox.append("" + fight_commentfe[ife]);
-           			res.revalidate();
-            		
-            	}
+        		}
             }
         });
 		
 		next.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event2) {
             		
-           		if(ife < wfe.length - 1 && hpLeftAfe[ife].length() != 0){
+           		if(ife < fightid.length - 1){
            			
            			ife ++;
-           			
-           			resultBox.setText("");
-           			
-        			if(Integer.valueOf(hpLeftAfe[ife]) >= Integer.valueOf(hpLeftBfe[ife]))resultBox.append(wfe[ife] + " (" + hpLeftAfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftBfe[ife] +"% HP left)\n");
-        			else resultBox.append(wfe[ife] + " (" + hpLeftBfe[ife] + "% HP left) won a fight against " + lfe[ife] + " (" + hpLeftAfe[ife] +"% HP left)\n");
-           			resultBox.append("At " + placefe[ife] + " X : " + xfe[ife] + " Y : " + yfe[ife] + "\n");
-           			resultBox.append("On the " + timefe[ife] + " for a " + fight_lengthfe[ife] + " seconds fight !\n");
-           			resultBox.append("" + fight_commentfe[ife]);
-           			res.revalidate();
-            		
-            	}
+           			resultFE(ife, resultBox);
+ 
+        		}
             }
         });
 		
@@ -406,12 +365,43 @@ public class GUI extends JFrame implements ActionListener{
 		
 	}
 	
+	public void resultFE(int ife, JTextArea resultBox){
+		
+		resultBox.setText("");
+		
+		if(fightid != null && fightid.length > 0){
+			
+			if(Integer.valueOf(db.getFightHpleftaFromID(fightid[ife])) >= Integer.valueOf(db.getFightHpleftbFromID(fightid[ife]))){
+				
+				resultBox.append("Name : " + db.getNameFromPlayerA(fightid[ife]) + " Guild : " + db.getGuildNameFromPlayerA(fightid[ife]) + " from Server : " + db.getServerFromPlayerA(fightid[ife]) +  " (" + db.getFightHpleftaFromID(fightid[ife]) + "% HP left)\n");
+				resultBox.append(db.getRaceFromPlayerA(fightid[ife]) + "(" + db.getFactionFromPlayerA(fightid[ife]) + "), " + db.getClassFromPlayerA(fightid[ife]) + " " + db.getSpecializationFromPlayerA(fightid[ife]) + ", level : " + db.getLevelFromPlayerA(fightid[ife]) + "\n\n");
+				resultBox.append("won a fight against\n\n");
+				resultBox.append("Name : " + db.getNameFromPlayerB(fightid[ife]) + " Guild : " + db.getGuildNameFromPlayerB(fightid[ife]) + " from Server : " + db.getServerFromPlayerB(fightid[ife]) +  " (" + db.getFightHpleftbFromID(fightid[ife]) + "% HP left)\n");
+				resultBox.append(db.getRaceFromPlayerB(fightid[ife]) + "(" + db.getFactionFromPlayerB(fightid[ife]) + "), " + db.getClassFromPlayerB(fightid[ife]) + " " + db.getSpecializationFromPlayerB(fightid[ife]) + ", level : " + db.getLevelFromPlayerB(fightid[ife]) + "\n\n");
+			
+			}
+			else{
+				
+				resultBox.append("Name : " + db.getNameFromPlayerB(fightid[ife]) + " Guild : " + db.getGuildNameFromPlayerB(fightid[ife]) + " from Server : " + db.getServerFromPlayerB(fightid[ife]) +  " (" + db.getFightHpleftbFromID(fightid[ife]) + "% HP left)\n");
+				resultBox.append(db.getRaceFromPlayerB(fightid[ife]) + "(" + db.getFactionFromPlayerB(fightid[ife]) + "), " + db.getClassFromPlayerB(fightid[ife]) + " " + db.getSpecializationFromPlayerB(fightid[ife]) + ", level : " + db.getLevelFromPlayerB(fightid[ife]) + "\n\n");
+				resultBox.append("won a fight against\n\n");
+				resultBox.append("Name : " + db.getNameFromPlayerA(fightid[ife]) + " Guild : " + db.getGuildNameFromPlayerA(fightid[ife]) + " from Server : " + db.getServerFromPlayerA(fightid[ife]) +  " (" + db.getFightHpleftaFromID(fightid[ife]) + "% HP left)\n");
+				resultBox.append(db.getRaceFromPlayerA(fightid[ife]) + "(" + db.getFactionFromPlayerA(fightid[ife]) + "), " + db.getClassFromPlayerA(fightid[ife]) + " " + db.getSpecializationFromPlayerA(fightid[ife]) + ", level : " + db.getLevelFromPlayerA(fightid[ife]) + "\n\n");
+				
+			}
+			resultBox.append("At " + db.getPlaceNameFromID(fightid[ife]) + " X : " + db.getPlaceXFromID(fightid[ife]) + " Y : " + db.getPlaceYFromID(fightid[ife]) + " in " + db.getPlaceRegionFromID(fightid[ife]) + "(" + db.getContinentFromPlaceID(fightid[ife]) + ")\n");
+			resultBox.append("On the " + db.getTimeFromFight(fightid[ife]) + " for a " + db.getLengthFromFight(fightid[ife]) + " seconds fight !\n");
+			resultBox.append("" + db.getCommentFromFight(fightid[ife]));
+			
+			
+		}
+		
+	}
+	
 	public void clearPanel(){
 		
 		addWindow.remove(playerPanel);
 		addWindow.remove(guildPanel);
-		addWindow.remove(placePanel);
-		addWindow.remove(timePanel);
 		addWindow.remove(fightPanel);
 		addWindow.setVisible(false);
 		
@@ -421,13 +411,14 @@ public class GUI extends JFrame implements ActionListener{
 		
 		JTextField name = new JTextField("Name");
 		JTextField guild = new JTextField("Guild");
+		JTextField server = new JTextField("Server (EU/NA-Name)");
 		JTextField faction = new JTextField("Faction");
 		JTextField race = new JTextField("Race");
 		JTextField classe = new JTextField("Classe");
 		JTextField specialization = new JTextField("Specialization");
 		JTextField level = new JTextField("Level");
-		JTextField nbgotkilled = new JTextField("NbGotKilled");
-		JTextField nbkilled = new JTextField("NbKilled");
+		JTextField nbdeaths = new JTextField("NB Deaths");
+		JTextField nbkills = new JTextField("NB Kills");
 		JTextField whisprage = new JTextField("Whisp Rage");
 		JTextField skill = new JTextField("Skill (x/10)");
 		JTextField backped = new JTextField("Backped (0/1)");
@@ -437,21 +428,11 @@ public class GUI extends JFrame implements ActionListener{
 		addPlayer.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event2) {
             	
-            	if(guild.getText() == "") guild.setText("No Guild");
+            	if(guild.getText().matches("")) guild.setText("Unguilded");
             	
-            	db.checkAddGuild(guild.getText(), 0, 0);
+            	db.addGuild(guild.getText());
             	
-            	db.checkAddPlayer(name.getText(), guild.getText(), faction.getText(), classe.getText(), specialization.getText(), skillcomment.getText(), Integer.valueOf(skill.getText()), Integer.valueOf(backped.getText()), Integer.valueOf(nbgotkilled.getText()), Integer.valueOf(nbkilled.getText()), whisprage.getText(), Integer.valueOf(level.getText()), race.getText());
-            	db.requestString("update CLASSES set CLASSES.NBGOTKILLED = CLASSES.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where CLASSES.NAME = '" + classe.getText() + "'");
-            	db.requestString("update CLASSES set CLASSES.NBKILLED = CLASSES.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where CLASSES.NAME = '" + classe.getText() + "'");
-            	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBGOTKILLED = SPECIALIZATIONS.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where SPECIALIZATIONS.NAME = '" + specialization.getText() + "'");
-            	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBKILLED = SPECIALIZATIONS.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where SPECIALIZATIONS.NAME = '" + specialization.getText() + "'");
-            	db.requestString("update GUILDS set GUILDS.NBGOTKILLED = GUILDS.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where GUILDS.NAME = '" + guild.getText() + "'");
-            	db.requestString("update GUILDS set GUILDS.NBKILLED = GUILDS.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where GUILDS.NAME = '" + guild.getText() + "'");
-            	db.requestString("update FACTIONS set FACTIONS.NBGOTKILLED = FACTIONS.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where FACTIONS.NAME = '" + faction.getText() + "'");
-            	db.requestString("update FACTIONS set FACTIONS.NBKILLED = FACTIONS.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where FACTIONS.NAME = '" + faction.getText() + "'");
-            	db.requestString("update RACES set RACES.NBGOTKILLED = RACES.NBGOTKILLED + " + Integer.valueOf(nbgotkilled.getText()) + " where RACES.NAME = '" + race.getText() + "'");
-            	db.requestString("update RACES set RACES.NBKILLED = RACES.NBKILLED + " + Integer.valueOf(nbkilled.getText()) + " where RACES.NAME = '" + race.getText() + "'");
+            	db.addPlayer(name.getText(), level.getText(), guild.getText(), server.getText(), faction.getText(), race.getText(), classe.getText(), specialization.getText(), nbkills.getText(), nbdeaths.getText(), whisprage.getText(), skill.getText(), backped.getText(), skillcomment.getText());
             	
             }
         });
@@ -460,13 +441,14 @@ public class GUI extends JFrame implements ActionListener{
 		
 		playerPanel.add(name);
 		playerPanel.add(guild);
+		playerPanel.add(server);
 		playerPanel.add(faction);
 		playerPanel.add(race);
 		playerPanel.add(classe);
 		playerPanel.add(specialization);
 		playerPanel.add(level);
-		playerPanel.add(nbkilled);
-		playerPanel.add(nbgotkilled);
+		playerPanel.add(nbdeaths);
+		playerPanel.add(nbkills);
 		playerPanel.add(whisprage);
 		playerPanel.add(skill);
 		playerPanel.add(backped);
@@ -480,15 +462,13 @@ public class GUI extends JFrame implements ActionListener{
 	public void setGuildPanel(){
 		
 		JTextField name = new JTextField("Name");
-		JTextField nbgotkilled = new JTextField("NbGotKilled");
-		JTextField nbkilled = new JTextField("NbKilled");
 			
 		addGuild = new JButton("Add Guild in database");
 		addGuild.setName("addWindowButtonG");
 		addGuild.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event2) {
 
-				db.checkAddGuild(name.getText(), Integer.valueOf(nbgotkilled.getText()), Integer.valueOf(nbkilled.getText()));
+				db.addGuild(name.getText());
 	            	
 	        }
 	    });
@@ -496,72 +476,10 @@ public class GUI extends JFrame implements ActionListener{
 		guildPanel.removeAll();
 			
 		guildPanel.add(name);
-		guildPanel.add(nbkilled);
-		guildPanel.add(nbgotkilled);
 		guildPanel.add(addGuild);
 			
 		guildPanel.revalidate();
 			
-	}
-	
-	public void setPlacePanel(){
-		
-		JTextField name = new JTextField("Name");
-		JTextField x = new JTextField("x");
-		JTextField y = new JTextField("y");
-		
-		addPlace = new JButton("Add Place in database");
-		addPlace.setName("addWindowButtonP");
-		addPlace.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event2) {
-
-            	db.checkAddPlace(name.getText(), Integer.valueOf(x.getText()), Integer.valueOf(y.getText()));
-            	
-            }
-        });
-		
-		placePanel.removeAll();
-		
-		placePanel.add(name);
-		placePanel.add(x);
-		placePanel.add(y);
-		placePanel.add(addPlace);
-		
-		placePanel.revalidate();
-		
-	}
-	
-	public void setTimePanel(){
-		
-		JTextField year = new JTextField("Year");
-		JTextField month = new JTextField("Month");
-		JTextField day = new JTextField("Day");
-		JTextField hour = new JTextField("Hour");
-		JTextField minute = new JTextField("Minute");
-		JTextField second = new JTextField("Second");
-		
-		addTime = new JButton("Add Time in database");
-		addTime.setName("addWindowButtonT");
-		addTime.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event2) {
-
-            	db.checkAddTime(Integer.valueOf(year.getText()),Integer.valueOf(month.getText()), Integer.valueOf(day.getText()), Integer.valueOf(hour.getText()), Integer.valueOf(minute.getText()), Integer.valueOf(second.getText()));
-            	
-            }
-        });
-		
-		timePanel.removeAll();
-		
-		timePanel.add(year);
-		timePanel.add(month);
-		timePanel.add(day);
-		timePanel.add(hour);
-		timePanel.add(minute);
-		timePanel.add(second);
-		timePanel.add(addTime);
-		
-		timePanel.revalidate();
-		
 	}
 	
 	public void setFightPanel(){
@@ -570,7 +488,7 @@ public class GUI extends JFrame implements ActionListener{
 		JTextField b = new JTextField("Player B");
 		JTextField winner = new JTextField("Winner");
 		JTextField loser = new JTextField("Loser");
-		JTextField place = new JTextField("Place : Name/X/Y");
+		JTextField place = new JTextField("Place : Name/X/Y/Region/Continent");
 		JTextField time = new JTextField("Date : AAAA-MO-DD HH:MI:SS");
 		JTextField fight_comment = new JTextField("Fight Comment");
 		JTextField fight_length = new JTextField("Fight length (s)");
@@ -615,40 +533,22 @@ public class GUI extends JFrame implements ActionListener{
             		error.append("Unknown Player assigned to Loser\n");
 
             	}
-            	
-            	//System.out.println("Error : " + error.getText());
+            	if(a.getText().matches(loser.getText()) == false && b.getText().matches(loser.getText()) == false && loser.getText().matches("") == false){
+
+            		error.append("Unknown Player assigned to Loser\n");
+
+            	}
             	
             	if(error.getText().isEmpty() == true){
             		
-            		//System.out.println("OKKKKKK");
-            		
             		String[] tempo = place.getText().split("/");
-            		int x = Integer.valueOf(tempo[1]);
-            		int y = Integer.valueOf(tempo[2]);
-            		
-            		String[] tempa = time.getText().split("-|\\:|\\ ");
-            		System.out.println(tempo[0]);
-            		
-            		
-            		db.checkAddPlace(tempo[0], x, y);
-            		db.checkAddTime(Integer.valueOf(tempa[0]), Integer.valueOf(tempa[1]), Integer.valueOf(tempa[2]), Integer.valueOf(tempa[3]), Integer.valueOf(tempa[4]), Integer.valueOf(tempa[5]));
-            		db.checkPlayerDB(a.getText());
-            		db.checkPlayerDB(b.getText());
-            		
-            		db.checkAddFight(a.getText(), b.getText(), winner.getText(), loser.getText(), time.getText(), tempo[0], x, y, fight_comment.getText(), Integer.valueOf(fight_length.getText()), Integer.valueOf(hplefta.getText()), Integer.valueOf(hpleftb.getText()));
-            		
-            		db.requestString("update CLASSES set CLASSES.NBGOTKILLED = CLASSES.NBGOTKILLED + 1 where CLASSES.NAME = '" + db.objectLists.findPlayer(loser.getText()).getClasse().getName() + "'");
-                	db.requestString("update CLASSES set CLASSES.NBKILLED = CLASSES.NBKILLED + 1 where CLASSES.NAME = '" + db.objectLists.findPlayer(winner.getText()).getClasse().getName() + "'");
-                	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBGOTKILLED = SPECIALIZATIONS.NBGOTKILLED + 1 where SPECIALIZATIONS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getSpecialization().getName() + "'");
-                	db.requestString("update SPECIALIZATIONS set SPECIALIZATIONS.NBKILLED = SPECIALIZATIONS.NBKILLED + 1 where SPECIALIZATIONS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getSpecialization().getName() + "'");
-                	db.requestString("update GUILDS set GUILDS.NBGOTKILLED = GUILDS.NBGOTKILLED + 1 where GUILDS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getGuild().getName() + "'");
-                	db.requestString("update GUILDS set GUILDS.NBKILLED = GUILDS.NBKILLED + 1 where GUILDS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getGuild().getName() + "'");
-                	db.requestString("update PLAYERS set PLAYERS.NBGOTKILLED = PLAYERS.NBGOTKILLED + 1 where PLAYERS.NAME = '" + loser.getText() + "'");
-                	db.requestString("update PLAYERS set PLAYERS.NBKILLED = PLAYERS.NBKILLED + 1 where PLAYERS.NAME = '" + winner.getText() + "'");
-                	db.requestString("update FACTIONS set FACTIONS.NBGOTKILLED = FACTIONS.NBGOTKILLED + 1 where FACTIONS.NAME = '" + db.objectLists.findPlayer(loser.getText()).getFaction().getName() + "'");
-                	db.requestString("update FACTIONS set FACTIONS.NBKILLED = FACTIONS.NBKILLED + 1 where FACTIONS.NAME = '" + db.objectLists.findPlayer(winner.getText()).getFaction().getName() + "'");
-                	db.requestString("update RACES set RACES.NBGOTKILLED = RACES.NBGOTKILLED + 1 where RACES.NAME = '" + db.objectLists.findPlayer(loser.getText()).getRace().getName() + "'");
-                	db.requestString("update RACES set RACES.NBKILLED = RACES.NBKILLED + 1 where RACES.NAME = '" + db.objectLists.findPlayer(winner.getText()).getRace().getName() + "'");
+            		String placename = tempo[0];
+            		String x = tempo[1];
+            		String y = tempo[2];
+            		String region = tempo[3];
+            		String continent = tempo[4];
+
+                	db.addFight(a.getText(), b.getText(), hplefta.getText(), hpleftb.getText(), winner.getText(), loser.getText(), time.getText(), fight_comment.getText(), fight_length.getText(), continent, region, placename, x, y);
                 	
             	}
             	
@@ -665,8 +565,8 @@ public class GUI extends JFrame implements ActionListener{
 		fightPanel.add(loser);
 		fightPanel.add(place);
 		fightPanel.add(time);
-		fightPanel.add(fight_comment);
 		fightPanel.add(fight_length);
+		fightPanel.add(fight_comment);
 		fightPanel.add(addFight);
 		fightPanel.add(error);
 		
@@ -679,14 +579,14 @@ public class GUI extends JFrame implements ActionListener{
 		
 		if(event.getSource() == sendRequest) outputRequest.setText(db.requestString(inputRequest.getText()));
 		if(event.getSource() == addWindowButton) toggleAddWindow();
-		if(event.getSource() == download) db.objectLists.loadEverything();
-		if(event.getSource() == exportToTxt)
+		//if(event.getSource() == download) db.objectLists.loadEverything();
+		/*if(event.getSource() == exportToTxt)
 			try {
-				db.objectLists.export();
+				//db.objectLists.export();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 		if(event.getSource() == fightExplorerWindow) toggleFightExplorer();	
 		
 		if(event.getSource() == list && (String)list.getSelectedItem() == "Player"){
@@ -703,22 +603,6 @@ public class GUI extends JFrame implements ActionListener{
 			clearPanel();
 			setGuildPanel();
 			addWindow.add(guildPanel, BorderLayout.CENTER);
-			addWindow.setVisible(true);
-		}
-		
-		if(event.getSource() == list && (String)list.getSelectedItem() == "Place"){
-			
-			clearPanel();
-			setPlacePanel();
-			addWindow.add(placePanel, BorderLayout.CENTER);
-			addWindow.setVisible(true);
-		}
-		
-		if(event.getSource() == list && (String)list.getSelectedItem() == "Time"){
-			
-			clearPanel();
-			setTimePanel();
-			addWindow.add(timePanel, BorderLayout.CENTER);
 			addWindow.setVisible(true);
 		}
 		
