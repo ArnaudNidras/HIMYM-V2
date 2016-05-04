@@ -6,9 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -151,7 +148,7 @@ public class GUI extends JFrame implements ActionListener{
 		this.download.setName("downloadDatabase");
 		this.download.addActionListener((ActionListener) this);
 		
-		this.exportToTxt = new JButton("Export DB to .txt");
+		this.exportToTxt = new JButton("Export DB to .csv");
 		this.exportToTxt.setName("exportToTxt");
 		this.exportToTxt.addActionListener((ActionListener) this);
 		

@@ -1,5 +1,7 @@
 package HIMYM;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -346,6 +348,196 @@ public class Db {
 			requestString("update players set nbdeaths = nbdeaths + 1 where player_id = " + loser);
 			
 		}
+		
+	}
+	
+	public void exportToCSV() throws IOException{
+		
+		int i = 0;
+		
+		FileWriter export = new FileWriter("Ressource/Export.csv");
+		
+		
+		export.append(';');
+		export.append("GUILDS\n");
+		export.append("Guild_ID");
+		export.append(';');
+		export.append("Name");
+		export.append("\n\n");
+		
+		int size = Integer.valueOf(requestString("select MAX(guild_id) from guilds"));
+		
+		for(i = 0 ; i <= size ; i ++ ){
+			
+			export.append(Integer.toString(i));
+			export.append(';');
+			export.append(requestString("select name from guilds where guild_id =" + i));
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("PLAYERS\n");
+		export.append("Player_ID");
+		export.append(';');
+		export.append("Name");
+		export.append(';');
+		export.append("Guild_ID");
+		export.append(';');
+		export.append("Server");
+		export.append(';');
+		export.append("Faction");
+		export.append(';');
+		export.append("Race");
+		export.append(';');
+		export.append("Classe");
+		export.append(';');
+		export.append("Specialization");
+		export.append(';');
+		export.append("Level");
+		export.append(';');
+		export.append("Skill x/10");
+		export.append(';');
+		export.append("Back Pedal");
+		export.append(';');
+		export.append("NB Kills");
+		export.append(';');
+		export.append("NB Deaths");
+		export.append(';');
+		export.append("Whisprage");
+		export.append(';');
+		export.append("Skill Comment");
+		export.append("\n\n");
+		
+		size = Integer.valueOf(requestString("select MAX(player_id) from players"));
+		
+		for(i = 0 ; i <= size ; i ++ ){
+			
+			export.append(Integer.toString(i));
+			export.append(';');
+			export.append(requestString("select name from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select guild from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select server from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select faction from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select race from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select classe from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select specialization from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select level from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select skill from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select backped from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select nbkills from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select nbdeaths from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select whisprage from players where player_id =" + i));
+			export.append(';');
+			export.append(requestString("select skillcomment from players where player_id =" + i));
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("PLACES\n");
+		export.append("Place_ID");
+		export.append(';');
+		export.append("Name");
+		export.append(';');
+		export.append("X Coordinate");
+		export.append(';');
+		export.append("Y Coordinate");
+		export.append(';');
+		export.append("Region");
+		export.append(';');
+		export.append("Continent");
+		export.append("\n\n");
+		
+		size = Integer.valueOf(requestString("select MAX(place_id) from places"));
+		
+		for(i = 0 ; i <= size ; i ++ ){
+			
+			export.append(Integer.toString(i));
+			export.append(';');
+			export.append(requestString("select name from places where place_id =" + i));
+			export.append(';');
+			export.append(requestString("select x from places where place_id =" + i));
+			export.append(';');
+			export.append(requestString("select y from places where place_id =" + i));
+			export.append(';');
+			export.append(requestString("select region from places where place_id =" + i));
+			export.append(';');
+			export.append(requestString("select r.continent from region r, places p where p.region = r.name and p.place_id =" + i));
+			
+		}
+		
+		export.append("\n");
+		
+		export.append(';');
+		export.append("FIGHTS\n");
+		export.append("Fight_ID");
+		export.append(';');
+		export.append("PlayerA_ID");
+		export.append(';');
+		export.append("PlayerB_ID");
+		export.append(';');
+		export.append("Winner_ID");
+		export.append(';');
+		export.append("Loser_ID");
+		export.append(';');
+		export.append("HP Left Player A");
+		export.append(';');
+		export.append("HP Left Player B");
+		export.append(';');
+		export.append("Time");
+		export.append(';');
+		export.append("Place_ID");
+		export.append(';');
+		export.append("Fight Comment");
+		export.append(';');
+		export.append("Fight Length");
+		export.append("\n\n");
+		
+		size = Integer.valueOf(requestString("select MAX(fight_id) from fights"));
+		
+		for(i = 0 ; i <= size ; i ++ ){
+			
+			export.append(Integer.toString(i));
+			export.append(';');
+			export.append(requestString("select playera from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select playerb from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select winner from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select loser from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select hplefta from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select hpleftb from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select to_char(time, 'YYYY-MM-DD HH24:MI:SS') from fights where fight_id =" + i));
+			export.append(';');
+			export.append(Integer.toString(i));
+			export.append(';');
+			export.append(requestString("select fightcomment from fights where fight_id =" + i));
+			export.append(';');
+			export.append(requestString("select fightlength from fights where fight_id =" + i));
+			
+		}
+		
+		export.flush();
+		export.close();
 		
 	}
 	
